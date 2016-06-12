@@ -66,7 +66,7 @@
 
   <section class="post" itemscope itemprop="blogPost">
   
-    <a href="/2016/06/11/hello-world/" title="Hello World" itemprop="url">
+    <a href="/2016/06/12/hello-world/" title="Hello World" itemprop="url">
   
     <h1 itemprop="name">Hello World</h1>
     
@@ -74,18 +74,37 @@
            <p itemprop="description" >Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the </p>
         
     
-    <time datetime="2016-06-11T12:51:53.367Z" itemprop="datePublished">2016-06-11</time>
+    <time datetime="2016-06-12T10:14:02.170Z" itemprop="datePublished">2016-06-12</time>
   </a>
 </section>
 
   <section class="post" itemscope itemprop="blogPost">
   
-    <a href="/2016/06/11/Language/" title="Language" itemprop="url">
+    <a href="/2016/06/12/Multi-Thread/" title="Multi Thread" itemprop="url">
   
-    <h1 itemprop="name">Language</h1>
+    <h1 itemprop="name">Multi Thread</h1>
     
      
-           <p itemprop="description" >12345678910#include &amp;lt;iostream&amp;gt;int main(int argc, char** argv)&amp;#123;    char c;    std::cout &amp;lt;&amp;lt; &quot;Hello World&quot; &amp;lt;&amp;lt; std::endl;</p>
+           <p itemprop="description" >线程安全对象周期管理多线程下对象销毁可能存在竞态
+不能由对象自身的mutex来保护
+在即将析构一个对象时，从何而知此时此刻有别的线程在正在执行对象的成员函数
+如何保证在执行成员函数期间，对象不会在另一个线程析构
+在调用某个对象的成员函数之前，如果得知这个对象是否还活着？它的析构函</p>
+        
+    
+    <time datetime="2016-06-12T06:38:01.000Z" itemprop="datePublished">2016-06-12</time>
+  </a>
+</section>
+
+  <section class="post" itemscope itemprop="blogPost">
+  
+    <a href="/2016/06/11/Language/" title="linux共享内存" itemprop="url">
+  
+    <h1 itemprop="name">linux共享内存</h1>
+    
+     
+           <p itemprop="description" >概述共享内存是可用IPC形式中最快的。使用共享内存需要掌握多个进程之间对给定内存区的同步访问。通常，信号量被用来实现对共享内存访问的同步。
+内存布局权限结构内核给每个IPC对象维护一个信息结构ipc_perm,该结构规定了权限和所有者。在sys/ipc.h中定义如下：123456</p>
         
     
     <time datetime="2016-06-11T12:43:32.000Z" itemprop="datePublished">2016-06-11</time>

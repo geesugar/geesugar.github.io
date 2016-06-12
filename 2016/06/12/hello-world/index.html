@@ -4,13 +4,12 @@
 <head>
   <meta charset="UTF-8">
   
-    <title>linux共享内存 | Geesugar</title>
+    <title>Hello World | Geesugar</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=3, minimum-scale=1">
     
     <meta name="author" content="Jack Long">
     
-    <meta name="description" content="概述共享内存是可用IPC形式中最快的。使用共享内存需要掌握多个进程之间对给定内存区的同步访问。通常，信号量被用来实现对共享内存访问的同步。
-内存布局权限结构内核给每个IPC对象维护一个信息结构ipc_perm,该结构规定了权限和所有者。在sys/ipc.h中定义如下：1234567891011121">
+    <meta name="description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in ">
     
     
     
@@ -70,15 +69,15 @@
 		<header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2016/06/11/Language/" title="linux共享内存" itemprop="url">linux共享内存</a>
+      <a href="/2016/06/12/hello-world/" title="Hello World" itemprop="url">Hello World</a>
   </h1>
   <p class="article-author">By
     
       <a href="http://geesugar.github.io" title="Jack Long">Jack Long</a>
     </p>
   <p class="article-time">
-    <time datetime="2016-06-11T12:43:32.000Z" itemprop="datePublished">2016-06-11</time>
-    Updated:<time datetime="2016-06-11T14:41:13.000Z" itemprop="dateModified">2016-06-11</time>
+    <time datetime="2016-06-12T10:14:02.170Z" itemprop="datePublished">2016-06-12</time>
+    Updated:<time datetime="2016-06-09T11:38:25.000Z" itemprop="dateModified">2016-06-09</time>
     
   </p>
 </header>
@@ -87,11 +86,18 @@
 		
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">Contents</strong>
-		<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#概述"><span class="toc-number">1.</span> <span class="toc-text">概述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#内存布局"><span class="toc-number">2.</span> <span class="toc-text">内存布局</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#权限结构"><span class="toc-number">3.</span> <span class="toc-text">权限结构</span></a></li></ol>
+		<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Quick-Start"><span class="toc-number">1.</span> <span class="toc-text">Quick Start</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Create-a-new-post"><span class="toc-number">1.1.</span> <span class="toc-text">Create a new post</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Run-server"><span class="toc-number">1.2.</span> <span class="toc-text">Run server</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Generate-static-files"><span class="toc-number">1.3.</span> <span class="toc-text">Generate static files</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Deploy-to-remote-sites"><span class="toc-number">1.4.</span> <span class="toc-text">Deploy to remote sites</span></a></li></ol></li></ol>
 		</div>
 		
-		<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>共享内存是可用IPC形式中最快的。使用共享内存需要掌握多个进程之间对给定内存区的<em>同步访问</em>。通常，<em>信号量</em>被用来实现对共享内存访问的同步。</p>
-<h2 id="内存布局"><a href="#内存布局" class="headerlink" title="内存布局"></a>内存布局</h2><h2 id="权限结构"><a href="#权限结构" class="headerlink" title="权限结构"></a>权限结构</h2><p>内核给每个IPC对象维护一个信息结构ipc_perm,该结构规定了权限和所有者。在<code>sys/ipc.h</code>中定义如下：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> ipc_perm</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">__key_t</span> __key;          <span class="comment">/* Key.  */</span></span><br><span class="line">    <span class="keyword">__uid_t</span> uid;            <span class="comment">/* Owner's user ID.  */</span></span><br><span class="line">    <span class="keyword">__gid_t</span> gid;            <span class="comment">/* Owner's group ID.  */</span></span><br><span class="line">    <span class="keyword">__uid_t</span> cuid;           <span class="comment">/* Creator's user ID.  */</span></span><br><span class="line">    <span class="keyword">__gid_t</span> cgid;           <span class="comment">/* Creator's group ID.  */</span></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">short</span> <span class="keyword">int</span> mode;        <span class="comment">/* Read/write permission.  */</span></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">short</span> <span class="keyword">int</span> __pad1;</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">short</span> <span class="keyword">int</span> __seq;       <span class="comment">/* Sequence number.  */</span></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">short</span> <span class="keyword">int</span> __pad2;</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> <span class="keyword">int</span> __unused1;</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> <span class="keyword">int</span> __unused2;</span><br><span class="line">  &#125;;</span><br></pre></td></tr></table></figure></p>
+		<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="external">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="external">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="external">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="external">GitHub</a>.</p>
+<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>
+<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="external">Server</a></p>
+<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="external">Generating</a></p>
+<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="external">Deployment</a></p>
   
 	</div>
 		<footer class="article-footer clearfix">
@@ -101,7 +107,7 @@
 
 <div class="article-share" id="share">
 
-  <div data-url="http://geesugar.github.io/2016/06/11/Language/" data-title="linux共享内存 | Geesugar" data-tsina="null" class="share clearfix">
+  <div data-url="http://geesugar.github.io/2016/06/12/hello-world/" data-title="Hello World | Geesugar" data-tsina="null" class="share clearfix">
   </div>
 
 </div>
@@ -110,14 +116,14 @@
 	
 <nav class="article-nav clearfix">
  
- <div class="prev" >
- <a href="/2016/06/12/Multi-Thread/" title="Multi Thread">
-  <strong>PREVIOUS:</strong><br/>
-  <span>
-  Multi Thread</span>
+
+<div class="next">
+<a href="/2016/06/12/Multi-Thread/"  title="Multi Thread">
+ <strong>NEXT:</strong><br/> 
+ <span>Multi Thread
+</span>
 </a>
 </div>
-
 
 </nav>
 
@@ -127,7 +133,7 @@
 
   <div id="toc" class="toc-aside">
   <strong class="toc-title">Contents</strong>
-  <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#概述"><span class="toc-number">1.</span> <span class="toc-text">概述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#内存布局"><span class="toc-number">2.</span> <span class="toc-text">内存布局</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#权限结构"><span class="toc-number">3.</span> <span class="toc-text">权限结构</span></a></li></ol>
+  <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Quick-Start"><span class="toc-number">1.</span> <span class="toc-text">Quick Start</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Create-a-new-post"><span class="toc-number">1.1.</span> <span class="toc-text">Create a new post</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Run-server"><span class="toc-number">1.2.</span> <span class="toc-text">Run server</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Generate-static-files"><span class="toc-number">1.3.</span> <span class="toc-text">Generate static files</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Deploy-to-remote-sites"><span class="toc-number">1.4.</span> <span class="toc-text">Deploy to remote sites</span></a></li></ol></li></ol>
   </div>
 
 <div id="asidepart">

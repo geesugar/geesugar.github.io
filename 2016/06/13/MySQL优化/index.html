@@ -1,0 +1,315 @@
+
+ <!DOCTYPE HTML>
+<html >
+<head>
+  <meta charset="UTF-8">
+  
+    <title>MySQL优化 | Geesugar</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=3, minimum-scale=1">
+    
+    <meta name="author" content="Jack Long">
+    
+    <meta name="description" content="观察周期性变化
+是否是由于缓存过期引起的周期性变化123456789101112#!/bin/bashwhile truedo	mysqladmin -uroot -p31415926 ext | awk &amp;apos;/Queries/&amp;#123;q=$4&amp;#125;/Threads_connect">
+    
+    
+    
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/geesugar_114.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/geesugar_114.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      <div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.svg" alt="Geesugar" title="Geesugar"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="Geesugar">Geesugar</a></h1>
+				<h2 class="blog-motto">Jack&#39;s Blog</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="Menu">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/tags">Tags</a></li>
+					
+						<li><a href="/categories">Categories</a></li>
+					
+					<li>
+					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="text" id="search" name="q" autocomplete="off" maxlength="20" placeholder="Search" />
+						<input type="hidden" name="q" value="site:geesugar.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/06/13/MySQL优化/" title="MySQL优化" itemprop="url">MySQL优化</a>
+  </h1>
+  <p class="article-author">By
+    
+      <a href="http://geesugar.github.io" title="Jack Long">Jack Long</a>
+    </p>
+  <p class="article-time">
+    <time datetime="2016-06-13T13:48:56.000Z" itemprop="datePublished">2016-06-13</time>
+    Updated:<time datetime="2016-06-14T08:17:01.000Z" itemprop="dateModified">2016-06-14</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">Contents</strong>
+		<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#观察周期性变化"><span class="toc-number">1.</span> <span class="toc-text">观察周期性变化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#sql语句分析-show-processlist（排序，创建临时表）"><span class="toc-number">2.</span> <span class="toc-text">sql语句分析 show processlist（排序，创建临时表）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#需要注意的状态："><span class="toc-number">2.1.</span> <span class="toc-text">需要注意的状态：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#什么时候产生临时表"><span class="toc-number">2.2.</span> <span class="toc-text">什么时候产生临时表</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#表的优化与列类型选择"><span class="toc-number">3.</span> <span class="toc-text">表的优化与列类型选择</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#既然hash查找如此高效，为什么不用hash索引"><span class="toc-number">3.1.</span> <span class="toc-text">既然hash查找如此高效，为什么不用hash索引</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#多列索引的左前缀规则"><span class="toc-number">4.</span> <span class="toc-text">多列索引的左前缀规则</span></a></li></ol>
+		</div>
+		
+		<h2 id="观察周期性变化"><a href="#观察周期性变化" class="headerlink" title="观察周期性变化"></a>观察周期性变化</h2><ul>
+<li>是否是由于缓存过期引起的周期性变化<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line">while true</span><br><span class="line">do</span><br><span class="line">	mysqladmin -uroot -p31415926 ext | awk &apos;/Queries/&#123;q=$4&#125;/Threads_connected/&#123;c=$4&#125;/Threads_running/&#123;r=$4&#125;END&#123;printf(&quot;%d %d %d\n&quot;, q, c, r)&#125;&apos; &gt;&gt; status.txt</span><br><span class="line">	sleep 1</span><br><span class="line">done</span><br><span class="line"></span><br><span class="line">//ab测试 apache</span><br><span class="line">ab -c 50 -n 200000 http://192.168.1.201/index.php</span><br><span class="line"></span><br><span class="line">//awk处理status文本，获取当前sql连接数</span><br><span class="line">awk &apos;&#123;q=$q-last; last=$1&#125;&#123;printf(&quot;%d %d %d&quot;), q, $2, $3&#125;&apos;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="sql语句分析-show-processlist（排序，创建临时表）"><a href="#sql语句分析-show-processlist（排序，创建临时表）" class="headerlink" title="sql语句分析 show processlist（排序，创建临时表）"></a>sql语句分析 show processlist（排序，创建临时表）</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">//监控脚本</span><br><span class="line">#!/bin/bash</span><br><span class="line">while true</span><br><span class="line">do</span><br><span class="line">	mysql -uroot -p31415926 -e&apos;show processlist\G&apos; | grep state |sort -rn|  uniq -c | sort -rn </span><br><span class="line">	usleep 100000  //每秒钟10次</span><br><span class="line">done</span><br><span class="line"></span><br><span class="line">//测试脚本</span><br><span class="line">sysbenc --test=oltp</span><br></pre></td></tr></table></figure>
+<h3 id="需要注意的状态："><a href="#需要注意的状态：" class="headerlink" title="需要注意的状态："></a>需要注意的状态：</h3><ul>
+<li>stattistics  分析语法</li>
+<li><strong>copying to tmp table</strong> </li>
+<li>sending data</li>
+<li>writing to net</li>
+<li><strong>sorting result</strong></li>
+</ul>
+<p>show profiles;<br>show profile for query 2;</p>
+<h3 id="什么时候产生临时表"><a href="#什么时候产生临时表" class="headerlink" title="什么时候产生临时表"></a>什么时候产生临时表</h3><h2 id="表的优化与列类型选择"><a href="#表的优化与列类型选择" class="headerlink" title="表的优化与列类型选择"></a>表的优化与列类型选择</h2><ul>
+<li>尽量不要用null （索引大，查询不方便）<br>explain select * from t4 where name=’a’\G;</li>
+<li>enum类型，内部使用整形存储。</li>
+<li>字段类型优先级 整形&gt; enum &gt; char &gt; blob</li>
+</ul>
+<h3 id="既然hash查找如此高效，为什么不用hash索引"><a href="#既然hash查找如此高效，为什么不用hash索引" class="headerlink" title="既然hash查找如此高效，为什么不用hash索引"></a>既然hash查找如此高效，为什么不用hash索引</h3><ul>
+<li>hash函数计算后的结果是随机的</li>
+<li>无法对范围查询进行优化</li>
+<li>无法利用前缀索引</li>
+<li>排序也无法优化</li>
+</ul>
+<h2 id="多列索引的左前缀规则"><a href="#多列索引的左前缀规则" class="headerlink" title="多列索引的左前缀规则"></a>多列索引的左前缀规则</h2>  
+	</div>
+		<footer class="article-footer clearfix">
+
+
+
+
+<div class="article-share" id="share">
+
+  <div data-url="http://geesugar.github.io/2016/06/13/MySQL优化/" data-title="MySQL优化 | Geesugar" data-tsina="null" class="share clearfix">
+  </div>
+
+</div>
+</footer>   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2016/06/13/awk/" title="awk">
+  <strong>PREVIOUS:</strong><br/>
+  <span>
+  awk</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2016/06/13/Smart-Pointer/"  title="Smart Pointer">
+ <strong>NEXT:</strong><br/> 
+ <span>Smart Pointer
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="Show Sidebar"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">Contents</strong>
+  <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#观察周期性变化"><span class="toc-number">1.</span> <span class="toc-text">观察周期性变化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#sql语句分析-show-processlist（排序，创建临时表）"><span class="toc-number">2.</span> <span class="toc-text">sql语句分析 show processlist（排序，创建临时表）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#需要注意的状态："><span class="toc-number">2.1.</span> <span class="toc-text">需要注意的状态：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#什么时候产生临时表"><span class="toc-number">2.2.</span> <span class="toc-text">什么时候产生临时表</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#表的优化与列类型选择"><span class="toc-number">3.</span> <span class="toc-text">表的优化与列类型选择</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#既然hash查找如此高效，为什么不用hash索引"><span class="toc-number">3.1.</span> <span class="toc-text">既然hash查找如此高效，为什么不用hash索引</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#多列索引的左前缀规则"><span class="toc-number">4.</span> <span class="toc-text">多列索引的左前缀规则</span></a></li></ol>
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="Hide Sidebar"></a></div>
+<aside class="clearfix">
+
+  
+
+  
+
+  <div class="rsspart">
+	<a href="null" target="_blank" title="rss">RSS</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<div class="social-font clearfix">
+		
+		
+		
+		
+		
+	</div>
+		<p class="copyright">Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/A-limon/pacman" target="_blank" title="Pacman">Pacman</a> © 2016 
+		
+		<a href="http://geesugar.github.io" target="_blank" title="Jack Long">Jack Long</a>
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.1.0.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else
+    {
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      h  = $('article h2')
+      ah = $('article h2'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  if(ah.length==0){
+    t.css('display','none');
+  }else{
+    c.click(function(){
+      ta.css('display', 'block').addClass('fadeIn');
+    });
+    o.click(function(){
+      ta.css('display', 'none');
+    });
+    $(window).scroll(function(){
+      ta.css("top",Math.max(140,320-$(this).scrollTop()));
+    });
+  };
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina');
+  var html = [
+  '<a href="#" class="overlay" id="qrcode"></a>',
+  '<div class="qrcode clearfix"><span>扫描二维码分享到微信朋友圈</span><a class="qrclose" href="#share"></a><strong>Loading...Please wait</strong><img id="qrcode-pic" data-src="http://s.jiathis.com/qrcode.php?url=' + encodedUrl + '"/></div>',
+  '<a href="#textlogo" class="article-back-to-top" title="Top"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="QRcode"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="Weibo"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+  $('.article-share-qrcode').click(function(){
+    var imgSrc = $('#qrcode-pic').attr('data-src');
+    $('#qrcode-pic').attr('src', imgSrc);
+    $('#qrcode-pic').load(function(){
+        $('.qrcode strong').text(' ');
+    });
+  });
+});     
+</script>
+
+
+
+
+
+
+  </body>
+</html>

@@ -1,0 +1,346 @@
+
+ <!DOCTYPE HTML>
+<html >
+<head>
+  <meta charset="UTF-8">
+  
+    <title>server | Geesugar</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=3, minimum-scale=1">
+    
+    <meta name="author" content="Jack Long">
+    
+    <meta name="description" content="Reactor模型主线程只监听文件描述符事件是否发生，IO处理单元，如果有事件发生将其交给工作线程处理（逻辑单元）。
+
+主线程注册就绪事件
+主线程等待连接上的读就绪事件
+有可读事件，将其放入请求队列
+工作线程处理请求队列中的事件
+主线程等待连接可写
+可写时，主线程将可写时间放入请求队列
+工作线程往s">
+    
+    
+    
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/geesugar_114.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/geesugar_114.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      <div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.svg" alt="Geesugar" title="Geesugar"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="Geesugar">Geesugar</a></h1>
+				<h2 class="blog-motto">Jack&#39;s Blog</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜單">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/tags">Tags</a></li>
+					
+						<li><a href="/categories">Categories</a></li>
+					
+					<li>
+					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="text" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:geesugar.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/06/18/server/" title="server" itemprop="url">server</a>
+  </h1>
+  <p class="article-author">By
+    
+      <a href="http://geesugar.github.io" title="Jack Long">Jack Long</a>
+    </p>
+  <p class="article-time">
+    <time datetime="2016-06-18T12:39:41.000Z" itemprop="datePublished">2016-06-18</time>
+    更新日期:<time datetime="2016-06-18T13:47:45.000Z" itemprop="dateModified">2016-06-18</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目錄</strong>
+		<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Reactor模型"><span class="toc-number">1.</span> <span class="toc-text">Reactor模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Proactor模型"><span class="toc-number">2.</span> <span class="toc-text">Proactor模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#高效的并发模型"><span class="toc-number">3.</span> <span class="toc-text">高效的并发模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#提高服务器性能的方法"><span class="toc-number">4.</span> <span class="toc-text">提高服务器性能的方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#服务器调试技术"><span class="toc-number">5.</span> <span class="toc-text">服务器调试技术</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#调整系统参数的介绍"><span class="toc-number">5.1.</span> <span class="toc-text">调整系统参数的介绍</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#GDB调试器的介绍"><span class="toc-number">5.2.</span> <span class="toc-text">GDB调试器的介绍</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#系统检测工具介绍"><span class="toc-number">5.3.</span> <span class="toc-text">系统检测工具介绍</span></a></li></ol></li></ol>
+		</div>
+		
+		<h2 id="Reactor模型"><a href="#Reactor模型" class="headerlink" title="Reactor模型"></a>Reactor模型</h2><p>主线程只监听文件描述符事件是否发生，IO处理单元，如果有事件发生将其交给工作线程处理（逻辑单元）。</p>
+<ul>
+<li>主线程注册就绪事件</li>
+<li>主线程等待连接上的读就绪事件</li>
+<li>有可读事件，将其放入请求队列</li>
+<li>工作线程处理请求队列中的事件</li>
+<li>主线程等待连接可写</li>
+<li>可写时，主线程将可写时间放入请求队列</li>
+<li>工作线程往socket上写入服务器处理客户请求</li>
+</ul>
+<p><img src="http://www.geesugar.com/BlogImg/reactormoxing.png" alt=""></p>
+<h2 id="Proactor模型"><a href="#Proactor模型" class="headerlink" title="Proactor模型"></a>Proactor模型</h2><p>工作线程仅仅复制业务逻辑，所有IO操作交给内核和主线程（信号），主线epoll_wait(）仅能够监听socket连接请求事件，而不能监听读写事件，这是与reactor的差别</p>
+<ul>
+<li>主线程注册socket上的读完成事件</li>
+<li>主线程处理其它逻辑</li>
+<li>读事件完成，发送信号</li>
+<li>应用程序调用信号处理函数</li>
+<li>主线程继续其它逻辑</li>
+<li>写入数据时，发送信号</li>
+<li>应用程序使用信号处理函数来善后</li>
+</ul>
+<p><img src="http://www.geesugar.com/BlogImg/prereactormoxing.png" alt=""></p>
+<p>同步I/O<br><img src="http://www.geesugar.com/BlogImg/tongbupreactor.png" alt=""></p>
+<p>共性：</p>
+<ul>
+<li>在线程或者监听socket上调用epoll_wait</li>
+<li>工作线程处理连接上的事件</li>
+<li>主线程和工作线程的沟通通过工作队列</li>
+</ul>
+<h2 id="高效的并发模型"><a href="#高效的并发模型" class="headerlink" title="高效的并发模型"></a>高效的并发模型</h2><p>并发模型特点</p>
+<ul>
+<li>适用于I/O密集型</li>
+<li>有多线程和多进程两种</li>
+<li>I/O处理单元和多个逻辑单元协调完成任务</li>
+</ul>
+<h2 id="提高服务器性能的方法"><a href="#提高服务器性能的方法" class="headerlink" title="提高服务器性能的方法"></a>提高服务器性能的方法</h2><ul>
+<li>创建池<br>  内存池<br>  进程池<br>  线程池</li>
+<li>减少数据复制</li>
+<li>减少上下文切换和锁</li>
+</ul>
+<h2 id="服务器调试技术"><a href="#服务器调试技术" class="headerlink" title="服务器调试技术"></a>服务器调试技术</h2><h3 id="调整系统参数的介绍"><a href="#调整系统参数的介绍" class="headerlink" title="调整系统参数的介绍"></a>调整系统参数的介绍</h3><ul>
+<li>修改最大文件描述符 ulimit -n;  ulimt -SHn max-file-number<br>和文件系统相关的内核参数<br>/proc/sys/fs/file-max<br>/proc</li>
+</ul>
+<h3 id="GDB调试器的介绍"><a href="#GDB调试器的介绍" class="headerlink" title="GDB调试器的介绍"></a>GDB调试器的介绍</h3><p>调试线程<br>thread info<br>设置线程阻塞还</p>
+<h3 id="系统检测工具介绍"><a href="#系统检测工具介绍" class="headerlink" title="系统检测工具介绍"></a>系统检测工具介绍</h3><p>lsof   列出当前系统文件描述符<br>-i socket  -u 指定用户指定进程打开的描述符 </p>
+<p>netcat  快速构建网络连接，<br>-i 间隔 -s  -u udp -z 扫描端口<br>nc -z test-server 2–50<br>nc -x test2:1080 -X www.baidu.com 80</p>
+<p>vmstat 实时输出系统资源使用情况<br>top  free</p>
+<p>ifstat  网络信息</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+
+
+
+
+<div class="article-share" id="share">
+
+  <div data-url="http://geesugar.github.io/2016/06/18/server/" data-title="server | Geesugar" data-tsina="null" class="share clearfix">
+  </div>
+
+</div>
+</footer>   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2016/06/18/hello-world/" title="Hello World">
+  <strong>PREVIOUS:</strong><br/>
+  <span>
+  Hello World</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2016/06/16/sed/"  title="sed">
+ <strong>NEXT:</strong><br/> 
+ <span>sed
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="顯示側邊欄"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目錄</strong>
+  <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Reactor模型"><span class="toc-number">1.</span> <span class="toc-text">Reactor模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Proactor模型"><span class="toc-number">2.</span> <span class="toc-text">Proactor模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#高效的并发模型"><span class="toc-number">3.</span> <span class="toc-text">高效的并发模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#提高服务器性能的方法"><span class="toc-number">4.</span> <span class="toc-text">提高服务器性能的方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#服务器调试技术"><span class="toc-number">5.</span> <span class="toc-text">服务器调试技术</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#调整系统参数的介绍"><span class="toc-number">5.1.</span> <span class="toc-text">调整系统参数的介绍</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#GDB调试器的介绍"><span class="toc-number">5.2.</span> <span class="toc-text">GDB调试器的介绍</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#系统检测工具介绍"><span class="toc-number">5.3.</span> <span class="toc-text">系统检测工具介绍</span></a></li></ol></li></ol>
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隱藏側邊欄"></a></div>
+<aside class="clearfix">
+
+  
+
+  
+
+  <div class="rsspart">
+	<a href="null" target="_blank" title="rss">RSS 訂閱</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<div class="social-font clearfix">
+		
+		
+		
+		
+		
+	</div>
+		<p class="copyright">Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/A-limon/pacman" target="_blank" title="Pacman">Pacman</a> © 2016 
+		
+		<a href="http://geesugar.github.io" target="_blank" title="Jack Long">Jack Long</a>
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.1.0.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else
+    {
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      h  = $('article h2')
+      ah = $('article h2'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  if(ah.length==0){
+    t.css('display','none');
+  }else{
+    c.click(function(){
+      ta.css('display', 'block').addClass('fadeIn');
+    });
+    o.click(function(){
+      ta.css('display', 'none');
+    });
+    $(window).scroll(function(){
+      ta.css("top",Math.max(140,320-$(this).scrollTop()));
+    });
+  };
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina');
+  var html = [
+  '<a href="#" class="overlay" id="qrcode"></a>',
+  '<div class="qrcode clearfix"><span>扫描二维码分享到微信朋友圈</span><a class="qrclose" href="#share"></a><strong>Loading...Please wait</strong><img id="qrcode-pic" data-src="http://s.jiathis.com/qrcode.php?url=' + encodedUrl + '"/></div>',
+  '<a href="#textlogo" class="article-back-to-top" title="Top"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="QRcode"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="Weibo"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+  $('.article-share-qrcode').click(function(){
+    var imgSrc = $('#qrcode-pic').attr('data-src');
+    $('#qrcode-pic').attr('src', imgSrc);
+    $('#qrcode-pic').load(function(){
+        $('.qrcode strong').text(' ');
+    });
+  });
+});     
+</script>
+
+
+
+
+
+
+  </body>
+</html>

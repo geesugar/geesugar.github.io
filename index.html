@@ -34,7 +34,7 @@
 				<h1 class="site-name"><a href="/" title="Geesugar">Geesugar</a></h1>
 				<h2 class="blog-motto">Jack&#39;s Blog</h2>
 			</div>
-			<div class="navbar"><a class="navbutton navmobile" href="#" title="Menu">
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜單">
 			</a></div>
 			<nav class="animated">
 				<ul>
@@ -51,7 +51,7 @@
 					
 					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
 						<label>Search</label>
-						<input type="text" id="search" name="q" autocomplete="off" maxlength="20" placeholder="Search" />
+						<input type="text" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
 						<input type="hidden" name="q" value="site:geesugar.github.io">
 					</form>
 					
@@ -66,7 +66,7 @@
 
   <section class="post" itemscope itemprop="blogPost">
   
-    <a href="/2016/06/17/hello-world/" title="Hello World" itemprop="url">
+    <a href="/2016/06/18/hello-world/" title="Hello World" itemprop="url">
   
     <h1 itemprop="name">Hello World</h1>
     
@@ -74,7 +74,28 @@
            <p itemprop="description" >Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the </p>
         
     
-    <time datetime="2016-06-17T02:53:36.461Z" itemprop="datePublished">2016-06-17</time>
+    <time datetime="2016-06-18T14:07:35.735Z" itemprop="datePublished">2016-06-18</time>
+  </a>
+</section>
+
+  <section class="post" itemscope itemprop="blogPost">
+  
+    <a href="/2016/06/18/server/" title="server" itemprop="url">
+  
+    <h1 itemprop="name">server</h1>
+    
+     
+           <p itemprop="description" >Reactor模型主线程只监听文件描述符事件是否发生，IO处理单元，如果有事件发生将其交给工作线程处理（逻辑单元）。
+
+主线程注册就绪事件
+主线程等待连接上的读就绪事件
+有可读事件，将其放入请求队列
+工作线程处理请求队列中的事件
+主线程等待连接可写
+可写时，主线程将可写时间放入请</p>
+        
+    
+    <time datetime="2016-06-18T12:39:41.000Z" itemprop="datePublished">2016-06-18</time>
   </a>
 </section>
 
@@ -157,8 +178,10 @@ sed流程与原理模式空间与缓存空间</p>
     <h1 itemprop="name">MySQL优化</h1>
     
      
-           <p itemprop="description" >观察周期性变化
-是否是由于缓存过期引起的周期性变化123456789101112#!/bin/bashwhile truedo	mysqladmin -uroot -p31415926 ext | awk &amp;apos;/Queries/&amp;#123;q=$4&amp;#125;/Threa</p>
+           <p itemprop="description" >优化流程
+innodbInnoDB线程：4个IO线程（read buffer， write buffer， log thread， insert buffer thread），1个master线程，1个锁监控线程，1个错误监控线程
+观察周期性变化
+是否是由于缓存过期引起的周期性变</p>
         
     
     <time datetime="2016-06-13T13:48:56.000Z" itemprop="datePublished">2016-06-13</time>
@@ -218,10 +241,10 @@ sed流程与原理模式空间与缓存空间</p>
 
 
 </div>
-      <div class="openaside"><a class="navbutton" href="#" title="Show Sidebar"></a></div>
+      <div class="openaside"><a class="navbutton" href="#" title="顯示側邊欄"></a></div>
 
 <div id="asidepart">
-<div class="closeaside"><a class="closebutton" href="#" title="Hide Sidebar"></a></div>
+<div class="closeaside"><a class="closebutton" href="#" title="隱藏側邊欄"></a></div>
 <aside class="clearfix">
 
   
@@ -229,7 +252,7 @@ sed流程与原理模式空间与缓存空间</p>
   
 
   <div class="rsspart">
-	<a href="null" target="_blank" title="rss">RSS</a>
+	<a href="null" target="_blank" title="rss">RSS 訂閱</a>
 </div>
 
 </aside>

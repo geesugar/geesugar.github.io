@@ -49,7 +49,7 @@ sed流程与原理模式空间与缓存空间
 				<h1 class="site-name"><a href="/" title="Geesugar">Geesugar</a></h1>
 				<h2 class="blog-motto">Jack&#39;s Blog</h2>
 			</div>
-			<div class="navbar"><a class="navbutton navmobile" href="#" title="Menu">
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜單">
 			</a></div>
 			<nav class="animated">
 				<ul>
@@ -66,7 +66,7 @@ sed流程与原理模式空间与缓存空间
 					
 					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
 						<label>Search</label>
-						<input type="text" id="search" name="q" autocomplete="off" maxlength="20" placeholder="Search" />
+						<input type="text" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
 						<input type="hidden" name="q" value="site:geesugar.github.io">
 					</form>
 					
@@ -90,7 +90,7 @@ sed流程与原理模式空间与缓存空间
     </p>
   <p class="article-time">
     <time datetime="2016-06-16T06:13:02.000Z" itemprop="datePublished">2016-06-16</time>
-    Updated:<time datetime="2016-06-16T08:42:59.000Z" itemprop="dateModified">2016-06-16</time>
+    更新日期:<time datetime="2016-06-16T08:42:59.000Z" itemprop="dateModified">2016-06-16</time>
     
   </p>
 </header>
@@ -98,7 +98,7 @@ sed流程与原理模式空间与缓存空间
 		
 		
 		<div id="toc" class="toc-article">
-			<strong class="toc-title">Contents</strong>
+			<strong class="toc-title">文章目錄</strong>
 		<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#sed是什么"><span class="toc-number">1.</span> <span class="toc-text">sed是什么</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#sed作用"><span class="toc-number">2.</span> <span class="toc-text">sed作用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#学习难点"><span class="toc-number">3.</span> <span class="toc-text">学习难点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#sed流程与原理"><span class="toc-number">4.</span> <span class="toc-text">sed流程与原理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#模式空间与缓存空间"><span class="toc-number">4.1.</span> <span class="toc-text">模式空间与缓存空间</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#正则表达式"><span class="toc-number">5.</span> <span class="toc-text">正则表达式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#元字符："><span class="toc-number">5.1.</span> <span class="toc-text">元字符：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#限定符："><span class="toc-number">5.2.</span> <span class="toc-text">限定符：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#反义："><span class="toc-number">5.3.</span> <span class="toc-text">反义：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#捕获"><span class="toc-number">5.4.</span> <span class="toc-text">捕获</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#贪婪与懒惰（sed不支持）"><span class="toc-number">5.5.</span> <span class="toc-text">贪婪与懒惰（sed不支持）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sed注意"><span class="toc-number">5.6.</span> <span class="toc-text">sed注意</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#sed基础命令"><span class="toc-number">6.</span> <span class="toc-text">sed基础命令</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#命令格式"><span class="toc-number">6.1.</span> <span class="toc-text">命令格式</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#sed自动化实战应用"><span class="toc-number">7.</span> <span class="toc-text">sed自动化实战应用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#一键安装脚本"><span class="toc-number">7.1.</span> <span class="toc-text">一键安装脚本</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#高级应用"><span class="toc-number">8.</span> <span class="toc-text">高级应用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#高级命令"><span class="toc-number">8.1.</span> <span class="toc-text">高级命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#实战应用"><span class="toc-number">8.2.</span> <span class="toc-text">实战应用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#常用范列"><span class="toc-number">8.3.</span> <span class="toc-text">常用范列</span></a></li></ol></li></ol>
 		</div>
 		
@@ -173,10 +173,10 @@ sed流程与原理模式空间与缓存空间
 <nav class="article-nav clearfix">
  
  <div class="prev" >
- <a href="/2016/06/17/hello-world/" title="Hello World">
+ <a href="/2016/06/18/server/" title="server">
   <strong>PREVIOUS:</strong><br/>
   <span>
-  Hello World</span>
+  server</span>
 </a>
 </div>
 
@@ -193,15 +193,15 @@ sed流程与原理模式空间与缓存空间
 
 	
 </div>  
-      <div class="openaside"><a class="navbutton" href="#" title="Show Sidebar"></a></div>
+      <div class="openaside"><a class="navbutton" href="#" title="顯示側邊欄"></a></div>
 
   <div id="toc" class="toc-aside">
-  <strong class="toc-title">Contents</strong>
+  <strong class="toc-title">文章目錄</strong>
   <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#sed是什么"><span class="toc-number">1.</span> <span class="toc-text">sed是什么</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#sed作用"><span class="toc-number">2.</span> <span class="toc-text">sed作用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#学习难点"><span class="toc-number">3.</span> <span class="toc-text">学习难点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#sed流程与原理"><span class="toc-number">4.</span> <span class="toc-text">sed流程与原理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#模式空间与缓存空间"><span class="toc-number">4.1.</span> <span class="toc-text">模式空间与缓存空间</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#正则表达式"><span class="toc-number">5.</span> <span class="toc-text">正则表达式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#元字符："><span class="toc-number">5.1.</span> <span class="toc-text">元字符：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#限定符："><span class="toc-number">5.2.</span> <span class="toc-text">限定符：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#反义："><span class="toc-number">5.3.</span> <span class="toc-text">反义：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#捕获"><span class="toc-number">5.4.</span> <span class="toc-text">捕获</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#贪婪与懒惰（sed不支持）"><span class="toc-number">5.5.</span> <span class="toc-text">贪婪与懒惰（sed不支持）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sed注意"><span class="toc-number">5.6.</span> <span class="toc-text">sed注意</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#sed基础命令"><span class="toc-number">6.</span> <span class="toc-text">sed基础命令</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#命令格式"><span class="toc-number">6.1.</span> <span class="toc-text">命令格式</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#sed自动化实战应用"><span class="toc-number">7.</span> <span class="toc-text">sed自动化实战应用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#一键安装脚本"><span class="toc-number">7.1.</span> <span class="toc-text">一键安装脚本</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#高级应用"><span class="toc-number">8.</span> <span class="toc-text">高级应用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#高级命令"><span class="toc-number">8.1.</span> <span class="toc-text">高级命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#实战应用"><span class="toc-number">8.2.</span> <span class="toc-text">实战应用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#常用范列"><span class="toc-number">8.3.</span> <span class="toc-text">常用范列</span></a></li></ol></li></ol>
   </div>
 
 <div id="asidepart">
-<div class="closeaside"><a class="closebutton" href="#" title="Hide Sidebar"></a></div>
+<div class="closeaside"><a class="closebutton" href="#" title="隱藏側邊欄"></a></div>
 <aside class="clearfix">
 
   
@@ -209,7 +209,7 @@ sed流程与原理模式空间与缓存空间
   
 
   <div class="rsspart">
-	<a href="null" target="_blank" title="rss">RSS</a>
+	<a href="null" target="_blank" title="rss">RSS 訂閱</a>
 </div>
 
 </aside>

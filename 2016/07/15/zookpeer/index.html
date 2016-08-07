@@ -1,0 +1,318 @@
+
+ <!DOCTYPE HTML>
+<html >
+<head>
+  <meta charset="UTF-8">
+  
+    <title>zookpeer | Geesugar</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=3, minimum-scale=1">
+    
+    <meta name="author" content="Jack Long">
+    
+    <meta name="description" content="高并发，海量存储集中式 –&amp;gt; 分布式
+Paxos算法三个角色
+proposer 提出提案
+acceptor 接受提案
+learner 学习被批准提案
+
+基本语义
+value(决议)只有被proposer提出后才能被批准
+在一次paxos算法中，只批准（chosen）一个value
+learne">
+    
+    
+    
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/geesugar_114.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/geesugar_114.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      <div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.svg" alt="Geesugar" title="Geesugar"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="Geesugar">Geesugar</a></h1>
+				<h2 class="blog-motto">Jack&#39;s Blog</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="Menu">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/tags">Tags</a></li>
+					
+						<li><a href="/categories">Categories</a></li>
+					
+					<li>
+					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="text" id="search" name="q" autocomplete="off" maxlength="20" placeholder="Search" />
+						<input type="hidden" name="q" value="site:geesugar.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/07/15/zookpeer/" title="zookpeer" itemprop="url">zookpeer</a>
+  </h1>
+  <p class="article-author">By
+    
+      <a href="http://geesugar.github.io" title="Jack Long">Jack Long</a>
+    </p>
+  <p class="article-time">
+    <time datetime="2016-07-14T23:20:51.000Z" itemprop="datePublished">2016-07-15</time>
+    Updated:<time datetime="2016-07-21T09:05:54.000Z" itemprop="dateModified">2016-07-21</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">Contents</strong>
+		<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Paxos算法"><span class="toc-number">1.</span> <span class="toc-text">Paxos算法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#三个角色"><span class="toc-number">1.1.</span> <span class="toc-text">三个角色</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#基本语义"><span class="toc-number">1.2.</span> <span class="toc-text">基本语义</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#zookeeper"><span class="toc-number">2.</span> <span class="toc-text">zookeeper</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#特点"><span class="toc-number">3.</span> <span class="toc-text">特点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#场景"><span class="toc-number">4.</span> <span class="toc-text">场景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#基本概念"><span class="toc-number">5.</span> <span class="toc-text">基本概念</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#集群角色"><span class="toc-number">5.1.</span> <span class="toc-text">集群角色</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#会话"><span class="toc-number">5.2.</span> <span class="toc-text">会话</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#数据节点"><span class="toc-number">5.3.</span> <span class="toc-text">数据节点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#版本"><span class="toc-number">5.4.</span> <span class="toc-text">版本</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#watcher-事件监听器"><span class="toc-number">5.5.</span> <span class="toc-text">watcher 事件监听器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ACL权限控制"><span class="toc-number">5.6.</span> <span class="toc-text">ACL权限控制</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#zookeeper权限搭建"><span class="toc-number">6.</span> <span class="toc-text">zookeeper权限搭建</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#伪集群-单机模式"><span class="toc-number">6.1.</span> <span class="toc-text">伪集群 单机模式</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#zookeeper客户端"><span class="toc-number">7.</span> <span class="toc-text">zookeeper客户端</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#zookeeper客户端API"><span class="toc-number">7.1.</span> <span class="toc-text">zookeeper客户端API</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ZkClient-Curator"><span class="toc-number">7.2.</span> <span class="toc-text">ZkClient Curator</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#实战"><span class="toc-number">8.</span> <span class="toc-text">实战</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#master选举"><span class="toc-number">8.1.</span> <span class="toc-text">master选举</span></a></li></ol></li></ol>
+		</div>
+		
+		<p>高并发，海量存储<br>集中式 –&gt; 分布式</p>
+<h2 id="Paxos算法"><a href="#Paxos算法" class="headerlink" title="Paxos算法"></a>Paxos算法</h2><h3 id="三个角色"><a href="#三个角色" class="headerlink" title="三个角色"></a>三个角色</h3><ol>
+<li>proposer<br> 提出提案</li>
+<li>acceptor<br> 接受提案</li>
+<li>learner<br> 学习被批准提案</li>
+</ol>
+<h3 id="基本语义"><a href="#基本语义" class="headerlink" title="基本语义"></a>基本语义</h3><ol>
+<li>value(决议)只有被proposer提出后才能被批准</li>
+<li>在一次paxos算法中，只批准（chosen）一个value</li>
+<li>learner只能获取被批准的value</li>
+</ol>
+<h2 id="zookeeper"><a href="#zookeeper" class="headerlink" title="zookeeper"></a>zookeeper</h2><p>zookeeper是分布式协调服务，由雅虎创建，是google chubby的开源实现。<br>zookeeper是高性能的分布式数据一致性解决方案。</p>
+<h2 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h2><p>1、顺序一致性<br>2、原子性<br>3、单一视图<br>4、可靠性<br>5、实时性<br>6、高性能。 3台集群可以达到12~13万QPS</p>
+<h2 id="场景"><a href="#场景" class="headerlink" title="场景"></a>场景</h2><p>1、数据发布/订阅<br>推、拉。发布者将数据发布到zk集群节点上。<br>2、负载均衡<br>3、命名服务<br>数据库表格ID，两种ID：自动增长和UUID<br>4、分布式协调/通知</p>
+<h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><h3 id="集群角色"><a href="#集群角色" class="headerlink" title="集群角色"></a>集群角色</h3><p>Leader<br>Follower<br>Observer</p>
+<h3 id="会话"><a href="#会话" class="headerlink" title="会话"></a>会话</h3><p>客户端和zookeeper服务器的连接</p>
+<h3 id="数据节点"><a href="#数据节点" class="headerlink" title="数据节点"></a>数据节点</h3><p>1、集群中的一台机器称为一个节点<br>2、数据模型中的数据单元znode，分为持久节点和临时节点<br>zookeeper的数据模型是一棵树，树的节点就是znode，znode中可以保存信息。</p>
+<h3 id="版本"><a href="#版本" class="headerlink" title="版本"></a>版本</h3><p>悲观锁，非常严格的锁策略，排他。在事物没有完成之前，下一个事物不能访问相同的资源。<br>乐观锁，对于数据库我们通常做法是在每个表中增加一个version版本字段，事物修改数据之前先读出数据，版本号也顺势读出，在更新操作时，update … set … where id=1 and verison=1,更新失败表示其他事物也修改了数据，系统抛出异常，让客户端自行处理，客户端可选择重试。</p>
+<p>版本类型（三种）：<br>version： 当前数据节点内容的版本号<br>cversion：当前数据节点子节点的版本号<br>aversion：当前数据节点ACL变更版本号</p>
+<h3 id="watcher-事件监听器"><a href="#watcher-事件监听器" class="headerlink" title="watcher 事件监听器"></a>watcher 事件监听器</h3><h3 id="ACL权限控制"><a href="#ACL权限控制" class="headerlink" title="ACL权限控制"></a>ACL权限控制</h3><p>五种权限类型：<br>Create：创建子节点权限<br>READ：<br>WRITE：<br>DELETE：<br>ADMIN：设置节点ACL的权限。</p>
+<h2 id="zookeeper权限搭建"><a href="#zookeeper权限搭建" class="headerlink" title="zookeeper权限搭建"></a>zookeeper权限搭建</h2><p>1、 zoo.cfg<br>server.1=192.168.1.105:2888:3888<br>server.2=192.168.1.106:2888:3888<br>2、 myid<br>3、 ./zkserver.sh start  启动服务器<br>4、 telnet .. 2181<br>    stat     //超过一办机器启动可提供服务，可以查看角色</p>
+<h3 id="伪集群-单机模式"><a href="#伪集群-单机模式" class="headerlink" title="伪集群 单机模式"></a>伪集群 单机模式</h3><h2 id="zookeeper客户端"><a href="#zookeeper客户端" class="headerlink" title="zookeeper客户端"></a>zookeeper客户端</h2><p>./skcli.sh -timeout 0 -r -server ip:port //-r只读模式<br>./skcli.sh -timeout 5000 -server 192.168.1.105：2181<br>命令：ls /<br>     stat /  //节点的状态信息<br>     get<br>     ls2<br>     create   //-s顺序节点 -e临时节点<br>     set     //修改节点  set /node_3 999 2  ;版本号<br>     quota   //配额，子节点个数或数据长度限制，当超过配额时，会在bin目录下的zookeeper.out文件会警告日志。</p>
+<h3 id="zookeeper客户端API"><a href="#zookeeper客户端API" class="headerlink" title="zookeeper客户端API"></a>zookeeper客户端API</h3><p>1、 jar包导入</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">import org.apache.zookeeper.ZooKeeper;</span><br><span class="line"></span><br><span class="line">public class CreateSession implements Watcher &#123;</span><br><span class="line">	private static ZooKeeper zookeeper;</span><br><span class="line">	</span><br><span class="line">	public static void main() throws IOException, InterruptedException&#123;</span><br><span class="line">		zookeeper = new ZooKeeper(&quot;192.168.1.105:2181&quot;, 5000, new CreateSession());</span><br><span class="line">		</span><br><span class="line">		System.out.println(zookeeper.getState()); //异步，这里是正在连接</span><br><span class="line">		Thread.sleep();</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line"></span><br><span class="line">	public void process(WatchEvent event)&#123;</span><br><span class="line">		System.out.println(&quot;收到事件&quot; + event);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="ZkClient-Curator"><a href="#ZkClient-Curator" class="headerlink" title="ZkClient Curator"></a>ZkClient Curator</h3><h2 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h2><h3 id="master选举"><a href="#master选举" class="headerlink" title="master选举"></a>master选举</h3><p>服务注册<br>服务发现<br>创建master， master选举<br>所有slaver需要关注master删除事件</p>
+<p>1、work服务器注册监听，关注节点的删除事件</p>
+<p><img src="http://www.geesugar.com/BlogImg/kafka1.png" alt=""></p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+
+
+
+
+<div class="article-share" id="share">
+
+  <div data-url="http://geesugar.github.io/2016/07/15/zookpeer/" data-title="zookpeer | Geesugar" data-tsina="null" class="share clearfix">
+  </div>
+
+</div>
+</footer>   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+
+<div class="next">
+<a href="/2016/07/05/MQ/"  title="MQ">
+ <strong>NEXT:</strong><br/> 
+ <span>MQ
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="Show Sidebar"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">Contents</strong>
+  <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Paxos算法"><span class="toc-number">1.</span> <span class="toc-text">Paxos算法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#三个角色"><span class="toc-number">1.1.</span> <span class="toc-text">三个角色</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#基本语义"><span class="toc-number">1.2.</span> <span class="toc-text">基本语义</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#zookeeper"><span class="toc-number">2.</span> <span class="toc-text">zookeeper</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#特点"><span class="toc-number">3.</span> <span class="toc-text">特点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#场景"><span class="toc-number">4.</span> <span class="toc-text">场景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#基本概念"><span class="toc-number">5.</span> <span class="toc-text">基本概念</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#集群角色"><span class="toc-number">5.1.</span> <span class="toc-text">集群角色</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#会话"><span class="toc-number">5.2.</span> <span class="toc-text">会话</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#数据节点"><span class="toc-number">5.3.</span> <span class="toc-text">数据节点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#版本"><span class="toc-number">5.4.</span> <span class="toc-text">版本</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#watcher-事件监听器"><span class="toc-number">5.5.</span> <span class="toc-text">watcher 事件监听器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ACL权限控制"><span class="toc-number">5.6.</span> <span class="toc-text">ACL权限控制</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#zookeeper权限搭建"><span class="toc-number">6.</span> <span class="toc-text">zookeeper权限搭建</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#伪集群-单机模式"><span class="toc-number">6.1.</span> <span class="toc-text">伪集群 单机模式</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#zookeeper客户端"><span class="toc-number">7.</span> <span class="toc-text">zookeeper客户端</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#zookeeper客户端API"><span class="toc-number">7.1.</span> <span class="toc-text">zookeeper客户端API</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ZkClient-Curator"><span class="toc-number">7.2.</span> <span class="toc-text">ZkClient Curator</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#实战"><span class="toc-number">8.</span> <span class="toc-text">实战</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#master选举"><span class="toc-number">8.1.</span> <span class="toc-text">master选举</span></a></li></ol></li></ol>
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="Hide Sidebar"></a></div>
+<aside class="clearfix">
+
+  
+
+  
+
+  <div class="rsspart">
+	<a href="null" target="_blank" title="rss">RSS</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<div class="social-font clearfix">
+		
+		
+		
+		
+		
+	</div>
+		<p class="copyright">Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/A-limon/pacman" target="_blank" title="Pacman">Pacman</a> © 2016 
+		
+		<a href="http://geesugar.github.io" target="_blank" title="Jack Long">Jack Long</a>
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.1.0.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else
+    {
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      h  = $('article h2')
+      ah = $('article h2'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  if(ah.length==0){
+    t.css('display','none');
+  }else{
+    c.click(function(){
+      ta.css('display', 'block').addClass('fadeIn');
+    });
+    o.click(function(){
+      ta.css('display', 'none');
+    });
+    $(window).scroll(function(){
+      ta.css("top",Math.max(140,320-$(this).scrollTop()));
+    });
+  };
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina');
+  var html = [
+  '<a href="#" class="overlay" id="qrcode"></a>',
+  '<div class="qrcode clearfix"><span>扫描二维码分享到微信朋友圈</span><a class="qrclose" href="#share"></a><strong>Loading...Please wait</strong><img id="qrcode-pic" data-src="http://s.jiathis.com/qrcode.php?url=' + encodedUrl + '"/></div>',
+  '<a href="#textlogo" class="article-back-to-top" title="Top"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="QRcode"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="Weibo"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+  $('.article-share-qrcode').click(function(){
+    var imgSrc = $('#qrcode-pic').attr('data-src');
+    $('#qrcode-pic').attr('src', imgSrc);
+    $('#qrcode-pic').load(function(){
+        $('.qrcode strong').text(' ');
+    });
+  });
+});     
+</script>
+
+
+
+
+
+
+  </body>
+</html>

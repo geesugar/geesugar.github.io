@@ -1,0 +1,348 @@
+
+ <!DOCTYPE HTML>
+<html >
+<head>
+  <meta charset="UTF-8">
+  
+    <title>TCP/IP | Geesugar</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=3, minimum-scale=1">
+    
+    <meta name="author" content="Jack Long">
+    
+    <meta name="description" content="TCP/IP网络编程接收连接过程tcp需要处理的问题（丢包、重复、延迟）
+
+accept建立连接过程，三次握手
+
+
+内核处理流程syn和accept不是无限长度，和调用listen函数参数backlog有关，第一步、第二步不可控，第三步由应用程序控制。若syn队列满，则会直接丢弃请求。若accept">
+    
+    
+    
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/geesugar_114.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/geesugar_114.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      <div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.svg" alt="Geesugar" title="Geesugar"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="Geesugar">Geesugar</a></h1>
+				<h2 class="blog-motto">Jack&#39;s Blog</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="Menu">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/tags">Tags</a></li>
+					
+						<li><a href="/categories">Categories</a></li>
+					
+					<li>
+					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="text" id="search" name="q" autocomplete="off" maxlength="20" placeholder="Search" />
+						<input type="hidden" name="q" value="site:geesugar.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/06/21/TCP-IP/" title="TCP/IP" itemprop="url">TCP/IP</a>
+  </h1>
+  <p class="article-author">By
+    
+      <a href="http://geesugar.github.io" title="Jack Long">Jack Long</a>
+    </p>
+  <p class="article-time">
+    <time datetime="2016-06-20T23:41:18.000Z" itemprop="datePublished">2016-06-21</time>
+    Updated:<time datetime="2016-06-21T10:23:12.000Z" itemprop="dateModified">2016-06-21</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">Contents</strong>
+		<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#TCP-IP"><span class="toc-number">1.</span> <span class="toc-text">TCP/IP</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#网络编程"><span class="toc-number">1.1.</span> <span class="toc-text">网络编程</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#接收连接过程"><span class="toc-number">1.1.1.</span> <span class="toc-text">接收连接过程</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#TCP超时重传"><span class="toc-number">1.2.</span> <span class="toc-text">TCP超时重传</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#TCP拥塞控制过程"><span class="toc-number">1.3.</span> <span class="toc-text">TCP拥塞控制过程</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#流量控制："><span class="toc-number">2.</span> <span class="toc-text">流量控制：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#拥塞控制"><span class="toc-number">3.</span> <span class="toc-text">拥塞控制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#网络套接字"><span class="toc-number">4.</span> <span class="toc-text">网络套接字</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#SOL-SOCKET-协议簇选项"><span class="toc-number">4.1.</span> <span class="toc-text">SOL_SOCKET 协议簇选项</span></a></li></ol></li></ol>
+		</div>
+		
+		<h2 id="TCP-IP"><a href="#TCP-IP" class="headerlink" title="TCP/IP"></a>TCP/IP</h2><h3 id="网络编程"><a href="#网络编程" class="headerlink" title="网络编程"></a>网络编程</h3><h4 id="接收连接过程"><a href="#接收连接过程" class="headerlink" title="接收连接过程"></a>接收连接过程</h4><p>tcp需要处理的问题（丢包、重复、延迟）</p>
+<ul>
+<li>accept建立连接过程，三次握手</li>
+</ul>
+<ol>
+<li>内核处理流程<br><img src="http://www.geesugar.com/BlogImg/sanciwoshou.png" alt=""><br>syn和accept不是无限长度，和调用listen函数参数backlog有关，第一步、第二步不可控，第三步由应用程序控制。<br>若syn队列满，则会直接丢弃请求。<br>若accept队列满，则不会导致放弃连接，也不会把连接从syn队列中移出。</li>
+<li>阻塞模式接收过程<br><img src="http://www.geesugar.com/BlogImg/zusaimoshishi.png" alt=""></li>
+<li>非阻塞模式接收过程<br><img src="http://www.geesugar.com/BlogImg/feizusaimoshi.png" alt=""></li>
+<li>tcp消息发送过程<br><img src="http://www.geesugar.com/BlogImg/tcpxiaoxiguocheng.png" alt=""><br>问题：</li>
+</ol>
+<ul>
+<li>发送成功返回时,意味着消息到达目标主机？<br>  否定,必须等待发送数据对应序列号的应答才算目标主机成功接收消息，而read和write不处理该信息，只是内核保证将把消息发送给目标主机</li>
+<li>发送成功返回时，意味着消息发送到网络上？</li>
+<li>阻塞和非阻塞对发送方法的影响是什么？</li>
+<li>MSS与MTU是什么关系？<br>  MSS(最大报文长度，避免IP层分片，在3次握手时互相告知对方，mtu长度1500 - 头 = 1460字节)</li>
+<li>为何会有TCP层分片和IP层分片现象</li>
+<li>MSS的值什么时候确定？</li>
+<li>MSS的值会发送改变么？</li>
+<li>TCP是如何保证可靠传输的?</li>
+</ul>
+<p>滑动窗口，最大不超过3次握手定义的大小，tcp push在发送数据时，会和滑动打交道<br>慢启动，拥塞窗口：<br>nagle算法：在应用进程发送方法时，小的tcp报文会增加网络拥塞的可能 </p>
+<ul>
+<li>tcp消息接收过程<br>问题：阻塞和非阻塞对接收消息的影响是什么？<br>阻塞模式下，函数标志位参数对接收有影响没？<br>网卡接收到的消息如何分发到对应TCP连接上？<br>消息到达在消息之前，内核如何处理？<br>并发访问时，内核如何处理？</li>
+</ul>
+<p>场景1：<br>1、网卡先收到消息，用户后调用接收函数<br>2、套接字为阻塞模式<br>3、接收低水位为默认值1<br>4、没有使用prequeue队列<br><img src="http://www.geesugar.com/BlogImg/tcpjieshouxiaoxi.png" alt=""></p>
+<p>场景2：<br>1、用户先调用接收函数，网卡后接收消息<br>2、套接字为阻塞模式<br>3、接收低水位为默认值1<br>4、涉及了prequeue队列<br><img src="http://www.geesugar.com/BlogImg/tcpjieshouxiaoxi1.png" alt=""></p>
+<p>场景3：<br>1、网卡先接收到消息，用户后调用接收函数<br>2、套接字为阻塞模式<br>3、设置接收低水位为n<br>4、没有使用prequeue队列<br><img src="http://www.geesugar.com/BlogImg/tcpjieshouxiaoxi2.png" alt=""></p>
+<ul>
+<li>tcp连接关闭过程<br>1、多线程共享的连接如何关闭？<br>2、关闭连接时，如何处理消息？<br>3、so_linger选项的功能是什么？</li>
+</ul>
+<p>close函数<br>缺点：<br>1、只是将套接字引用技术减一<br>2、close会终止TCP的双工链路</p>
+<p>shutdown函数<br>1、 不管引用计数就激发TCP的正常连接终止序列<br>2、 利用shutdown函数可以关闭全双工的任意一端<br>3、 so_linger选项功能：（谨慎运用）<br>    可以确保可靠性传输<br>    可以定时关闭连接<br>    控制close的阻塞时长</p>
+<h3 id="TCP超时重传"><a href="#TCP超时重传" class="headerlink" title="TCP超时重传"></a>TCP超时重传</h3><ul>
+<li>TCP模块为每个TCP报文段维护一个重传定时器</li>
+<li>如果超时，则进行重传，重新设置定时器</li>
+</ul>
+<h3 id="TCP拥塞控制过程"><a href="#TCP拥塞控制过程" class="headerlink" title="TCP拥塞控制过程"></a>TCP拥塞控制过程</h3><p>提高网络利用率、降低丢包率、拥塞控制<br>在发送方可以通过滑动窗口进行流量控制<br>拥塞控制：发送窗口SWND，窗口小（延迟），窗口大（拥塞）<br>        拥塞窗口CWND，<br>拥塞控制分为四部分：</p>
+<ul>
+<li>TCP慢启动<br>  只要网络没有出现拥塞，就增大拥塞窗口，加倍，当主机开始发送数据时，如果将大量字节注入网络，可能引起网络拥塞，可以从小到大来试探网络情况，逐步增大发送端的拥塞窗口。阈值，小于阈值采用拥塞控制算法，大于阈值采用拥塞避免算法。</li>
+<li>拥塞避免<br>  为了让拥塞窗口缓慢加大，每次加一。</li>
+</ul>
+<p>拥塞发生后的处理过程：<br>    收到三个重复的确认处理过程，拥塞窗口减半，快速重传，快速恢复<br>    收到1个重复的确认处理过程，执行拥塞避免算法<br>    收到新数据确认时的处理过程。</p>
+<ul>
+<li>快速重传</li>
+<li>快速恢复</li>
+</ul>
+<h2 id="流量控制："><a href="#流量控制：" class="headerlink" title="流量控制："></a>流量控制：</h2><p>所谓流量控制,让发送方发送速率不要太快，要让接收方来得及接收。流量控制可以有效防止网络中瞬间数据带来的冲击。<br>发送窗口不能超过接收窗口的大小。</p>
+<h2 id="拥塞控制"><a href="#拥塞控制" class="headerlink" title="拥塞控制"></a>拥塞控制</h2><p>网络拥塞现象是发送端发送给接收端的网络分组过多，使该部分网络来不及处理。以致引起部分至整个网络性能下降的现象，严重时甚至会导致网络通信业务陷入停顿，即出现死锁现象。</p>
+<h2 id="网络套接字"><a href="#网络套接字" class="headerlink" title="网络套接字"></a>网络套接字</h2><h3 id="SOL-SOCKET-协议簇选项"><a href="#SOL-SOCKET-协议簇选项" class="headerlink" title="SOL_SOCKET 协议簇选项"></a>SOL_SOCKET 协议簇选项</h3><p>getsockopt(SOL_SOCKET)<br>setsockopt(SOL_SOCKET)<br>level： SOL_SOCKET   IPPROTO_IP  IPPROTO_TCP(最大重传事件等)<br>SO_KEEPALIVE： 保持连接选项，2小时没有数据交互，发送探测报文，有三种回应：<br>1.回应一个ACK报文<br>2、回应一个RST报文<br>3、没有任何回应（在75秒内发送8个探测报文，然后关闭socket）、</p>
+<p>SO_LINGER: 设置TCP关闭连接后的行为<br>struct linger{<br>    int l_onoff;        //开启，关闭<br>    int l_linger;       //滞留时间<br>}<br>l_onoff=0； 此时l_linger不起作用<br>l_onoff不为0， l_linger为0；  close立即返回</p>
+<p>SO_RCVBUF SO_SNDBUF缓冲区大小<br>1、TCP和UDP连接中的含义有所不同，TCP缓冲区大小就是滑动窗口大小<br>2、connect()系统调用之前设置</p>
+<p>SO_RCVTIMEO 接收超时<br>SO_SNDTIMEO 发送超时</p>
+<p>SO_RCVLOWAT SO_SNDLOWAT 低水位标记</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+
+
+
+
+<div class="article-share" id="share">
+
+  <div data-url="http://geesugar.github.io/2016/06/21/TCP-IP/" data-title="TCP/IP | Geesugar" data-tsina="null" class="share clearfix">
+  </div>
+
+</div>
+</footer>   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2016/06/21/I-O/" title="I/O">
+  <strong>PREVIOUS:</strong><br/>
+  <span>
+  I/O</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2016/06/18/server/"  title="server">
+ <strong>NEXT:</strong><br/> 
+ <span>server
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="Show Sidebar"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">Contents</strong>
+  <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#TCP-IP"><span class="toc-number">1.</span> <span class="toc-text">TCP/IP</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#网络编程"><span class="toc-number">1.1.</span> <span class="toc-text">网络编程</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#接收连接过程"><span class="toc-number">1.1.1.</span> <span class="toc-text">接收连接过程</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#TCP超时重传"><span class="toc-number">1.2.</span> <span class="toc-text">TCP超时重传</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#TCP拥塞控制过程"><span class="toc-number">1.3.</span> <span class="toc-text">TCP拥塞控制过程</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#流量控制："><span class="toc-number">2.</span> <span class="toc-text">流量控制：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#拥塞控制"><span class="toc-number">3.</span> <span class="toc-text">拥塞控制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#网络套接字"><span class="toc-number">4.</span> <span class="toc-text">网络套接字</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#SOL-SOCKET-协议簇选项"><span class="toc-number">4.1.</span> <span class="toc-text">SOL_SOCKET 协议簇选项</span></a></li></ol></li></ol>
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="Hide Sidebar"></a></div>
+<aside class="clearfix">
+
+  
+
+  
+
+  <div class="rsspart">
+	<a href="null" target="_blank" title="rss">RSS</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<div class="social-font clearfix">
+		
+		
+		
+		
+		
+	</div>
+		<p class="copyright">Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/A-limon/pacman" target="_blank" title="Pacman">Pacman</a> © 2016 
+		
+		<a href="http://geesugar.github.io" target="_blank" title="Jack Long">Jack Long</a>
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.1.0.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else
+    {
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      h  = $('article h2')
+      ah = $('article h2'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  if(ah.length==0){
+    t.css('display','none');
+  }else{
+    c.click(function(){
+      ta.css('display', 'block').addClass('fadeIn');
+    });
+    o.click(function(){
+      ta.css('display', 'none');
+    });
+    $(window).scroll(function(){
+      ta.css("top",Math.max(140,320-$(this).scrollTop()));
+    });
+  };
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina');
+  var html = [
+  '<a href="#" class="overlay" id="qrcode"></a>',
+  '<div class="qrcode clearfix"><span>扫描二维码分享到微信朋友圈</span><a class="qrclose" href="#share"></a><strong>Loading...Please wait</strong><img id="qrcode-pic" data-src="http://s.jiathis.com/qrcode.php?url=' + encodedUrl + '"/></div>',
+  '<a href="#textlogo" class="article-back-to-top" title="Top"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="QRcode"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="Weibo"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+  $('.article-share-qrcode').click(function(){
+    var imgSrc = $('#qrcode-pic').attr('data-src');
+    $('#qrcode-pic').attr('src', imgSrc);
+    $('#qrcode-pic').load(function(){
+        $('.qrcode strong').text(' ');
+    });
+  });
+});     
+</script>
+
+
+
+
+
+
+  </body>
+</html>

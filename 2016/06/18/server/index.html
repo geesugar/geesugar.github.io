@@ -9,15 +9,8 @@
     
     <meta name="author" content="Jack Long">
     
-    <meta name="description" content="Reactor模型主线程只监听文件描述符事件是否发生，IO处理单元，如果有事件发生将其交给工作线程处理（逻辑单元）。
-
-主线程注册就绪事件
-主线程等待连接上的读就绪事件
-有可读事件，将其放入请求队列
-工作线程处理请求队列中的事件
-主线程等待连接可写
-可写时，主线程将可写时间放入请求队列
-工作线程往s">
+    <meta name="description" content="例子接入层，（维护长连接，业务逻辑少，初步攻防：连接频率, 过滤，压缩与解压缩，黑白名单）逻辑处理层（接口有限：登录，登出，keepalive，）存储（内存存储，数据库存储）
+拔掉网线，可能客户端和业务端都无法捕捉到epollin，epollout, epollerror事件，每30s发送心跳包到客">
     
     
     
@@ -44,7 +37,7 @@
 				<h1 class="site-name"><a href="/" title="Geesugar">Geesugar</a></h1>
 				<h2 class="blog-motto">Jack&#39;s Blog</h2>
 			</div>
-			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜單">
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="Menu">
 			</a></div>
 			<nav class="animated">
 				<ul>
@@ -61,7 +54,7 @@
 					
 					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
 						<label>Search</label>
-						<input type="text" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="text" id="search" name="q" autocomplete="off" maxlength="20" placeholder="Search" />
 						<input type="hidden" name="q" value="site:geesugar.github.io">
 					</form>
 					
@@ -85,7 +78,7 @@
     </p>
   <p class="article-time">
     <time datetime="2016-06-18T12:39:41.000Z" itemprop="datePublished">2016-06-18</time>
-    更新日期:<time datetime="2016-06-18T13:47:45.000Z" itemprop="dateModified">2016-06-18</time>
+    Updated:<time datetime="2016-07-01T06:27:40.000Z" itemprop="dateModified">2016-07-01</time>
     
   </p>
 </header>
@@ -93,11 +86,22 @@
 		
 		
 		<div id="toc" class="toc-article">
-			<strong class="toc-title">文章目錄</strong>
-		<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Reactor模型"><span class="toc-number">1.</span> <span class="toc-text">Reactor模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Proactor模型"><span class="toc-number">2.</span> <span class="toc-text">Proactor模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#高效的并发模型"><span class="toc-number">3.</span> <span class="toc-text">高效的并发模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#提高服务器性能的方法"><span class="toc-number">4.</span> <span class="toc-text">提高服务器性能的方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#服务器调试技术"><span class="toc-number">5.</span> <span class="toc-text">服务器调试技术</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#调整系统参数的介绍"><span class="toc-number">5.1.</span> <span class="toc-text">调整系统参数的介绍</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#GDB调试器的介绍"><span class="toc-number">5.2.</span> <span class="toc-text">GDB调试器的介绍</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#系统检测工具介绍"><span class="toc-number">5.3.</span> <span class="toc-text">系统检测工具介绍</span></a></li></ol></li></ol>
+			<strong class="toc-title">Contents</strong>
+		<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#例子"><span class="toc-number">1.</span> <span class="toc-text">例子</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#c-11"><span class="toc-number">2.</span> <span class="toc-text">c++11</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#转移构造函数"><span class="toc-number">2.1.</span> <span class="toc-text">转移构造函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#左值引用-amp-右值引用"><span class="toc-number">2.2.</span> <span class="toc-text">左值引用 & 右值引用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#易用性改善-lambda-std-function-auto关键字-for-each循环"><span class="toc-number">2.3.</span> <span class="toc-text">易用性改善 lambda std::function auto关键字 for_each循环</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MQTT"><span class="toc-number">3.</span> <span class="toc-text">MQTT</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Reactor模型"><span class="toc-number">4.</span> <span class="toc-text">Reactor模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Proactor模型"><span class="toc-number">5.</span> <span class="toc-text">Proactor模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#高效的并发模型"><span class="toc-number">6.</span> <span class="toc-text">高效的并发模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#提高服务器性能的方法"><span class="toc-number">7.</span> <span class="toc-text">提高服务器性能的方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#服务器调试技术"><span class="toc-number">8.</span> <span class="toc-text">服务器调试技术</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#调整系统参数的介绍"><span class="toc-number">8.1.</span> <span class="toc-text">调整系统参数的介绍</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#GDB调试器的介绍"><span class="toc-number">8.2.</span> <span class="toc-text">GDB调试器的介绍</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#系统检测工具介绍"><span class="toc-number">8.3.</span> <span class="toc-text">系统检测工具介绍</span></a></li></ol></li></ol>
 		</div>
 		
-		<h2 id="Reactor模型"><a href="#Reactor模型" class="headerlink" title="Reactor模型"></a>Reactor模型</h2><p>主线程只监听文件描述符事件是否发生，IO处理单元，如果有事件发生将其交给工作线程处理（逻辑单元）。</p>
+		<h2 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h2><p>接入层，（维护长连接，业务逻辑少，初步攻防：连接频率, 过滤，压缩与解压缩，黑白名单）<br>逻辑处理层（接口有限：登录，登出，keepalive，）<br>存储（内存存储，数据库存储）</p>
+<p>拔掉网线，可能客户端和业务端都无法捕捉到epollin，epollout, epollerror事件，每30s发送心跳包到客户断，可以纠正tcp状态</p>
+<p>可扩展性，一致性，可靠性<br><img src="http://www.geesugar.com/BlogImg/58tongcheng.png" alt=""></p>
+<h2 id="c-11"><a href="#c-11" class="headerlink" title="c++11"></a>c++11</h2><p>std::move()<br><img src="http://www.geesugar.com/BlogImg/zhuanyigouzhaohanshu.png" alt=""></p>
+<h3 id="转移构造函数"><a href="#转移构造函数" class="headerlink" title="转移构造函数"></a>转移构造函数</h3><p><img src="http://www.geesugar.com/BlogImg/zhuanyigouzhaohanshu1.png" alt=""></p>
+<h3 id="左值引用-amp-右值引用"><a href="#左值引用-amp-右值引用" class="headerlink" title="左值引用 &amp; 右值引用"></a>左值引用 &amp; 右值引用</h3><p>右值引用可以作为临时对象的引用<br>vector<int> input_value();</int></p>
+<p>vector<int>&amp; lref = input_value() //编译错误<br>const vector<int>&amp; lref = input_value() //旧标准</int></int></p>
+<p>vector<int>&amp;&amp; lref =  input_value()； //右值引用，不会复制，是用转移构造函数</int></p>
+<p>转移构造函数的优点<br>1、转移比复制快<br>2、有些对象只能转移，不能复制<br>3、。。。</p>
+<p>新的模版类型std::unique_ptr替代std::auto_ptr成为标准库中的自动内存管理类型，支持转移构造，且不支持复制构造<br>vector<auto_ptr<isteam> &gt; input_streams; //不能这样实现，因为istream不支持复制构造，模版类型参数必须支持复制构造，所以auto_ptr不能这样引用<br>vector<unique_ptr替代std<isteam> &gt; input_streams; //可以实现，vecotor默认使用转移构造，如果转移构造没有再调用复制构造</unique_ptr替代std<isteam></auto_ptr<isteam></p>
+<h3 id="易用性改善-lambda-std-function-auto关键字-for-each循环"><a href="#易用性改善-lambda-std-function-auto关键字-for-each循环" class="headerlink" title="易用性改善 lambda std::function auto关键字 for_each循环"></a>易用性改善 lambda std::function auto关键字 for_each循环</h3><p><img src="http://www.geesugar.com/BlogImg/stlsuanfa.png" alt=""><br>lambda就是函数对象<br><img src="http://www.geesugar.com/BlogImg/lambda.png" alt=""><br><img src="http://www.geesugar.com/BlogImg/lambda1.png" alt=""><br><img src="http://www.geesugar.com/BlogImg/lambda2.png" alt=""><br><img src="http://www.geesugar.com/BlogImg/lambda3.png" alt=""></p>
+<h2 id="MQTT"><a href="#MQTT" class="headerlink" title="MQTT"></a>MQTT</h2><h2 id="Reactor模型"><a href="#Reactor模型" class="headerlink" title="Reactor模型"></a>Reactor模型</h2><p>主线程只监听文件描述符事件是否发生，IO处理单元，如果有事件发生将其交给工作线程处理（逻辑单元）。</p>
 <ul>
 <li>主线程注册就绪事件</li>
 <li>主线程等待连接上的读就绪事件</li>
@@ -164,10 +168,10 @@
 <nav class="article-nav clearfix">
  
  <div class="prev" >
- <a href="/2016/06/18/hello-world/" title="Hello World">
+ <a href="/2016/06/21/TCP-IP/" title="TCP/IP">
   <strong>PREVIOUS:</strong><br/>
   <span>
-  Hello World</span>
+  TCP/IP</span>
 </a>
 </div>
 
@@ -184,15 +188,15 @@
 
 	
 </div>  
-      <div class="openaside"><a class="navbutton" href="#" title="顯示側邊欄"></a></div>
+      <div class="openaside"><a class="navbutton" href="#" title="Show Sidebar"></a></div>
 
   <div id="toc" class="toc-aside">
-  <strong class="toc-title">文章目錄</strong>
-  <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Reactor模型"><span class="toc-number">1.</span> <span class="toc-text">Reactor模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Proactor模型"><span class="toc-number">2.</span> <span class="toc-text">Proactor模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#高效的并发模型"><span class="toc-number">3.</span> <span class="toc-text">高效的并发模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#提高服务器性能的方法"><span class="toc-number">4.</span> <span class="toc-text">提高服务器性能的方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#服务器调试技术"><span class="toc-number">5.</span> <span class="toc-text">服务器调试技术</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#调整系统参数的介绍"><span class="toc-number">5.1.</span> <span class="toc-text">调整系统参数的介绍</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#GDB调试器的介绍"><span class="toc-number">5.2.</span> <span class="toc-text">GDB调试器的介绍</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#系统检测工具介绍"><span class="toc-number">5.3.</span> <span class="toc-text">系统检测工具介绍</span></a></li></ol></li></ol>
+  <strong class="toc-title">Contents</strong>
+  <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#例子"><span class="toc-number">1.</span> <span class="toc-text">例子</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#c-11"><span class="toc-number">2.</span> <span class="toc-text">c++11</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#转移构造函数"><span class="toc-number">2.1.</span> <span class="toc-text">转移构造函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#左值引用-amp-右值引用"><span class="toc-number">2.2.</span> <span class="toc-text">左值引用 & 右值引用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#易用性改善-lambda-std-function-auto关键字-for-each循环"><span class="toc-number">2.3.</span> <span class="toc-text">易用性改善 lambda std::function auto关键字 for_each循环</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MQTT"><span class="toc-number">3.</span> <span class="toc-text">MQTT</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Reactor模型"><span class="toc-number">4.</span> <span class="toc-text">Reactor模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Proactor模型"><span class="toc-number">5.</span> <span class="toc-text">Proactor模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#高效的并发模型"><span class="toc-number">6.</span> <span class="toc-text">高效的并发模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#提高服务器性能的方法"><span class="toc-number">7.</span> <span class="toc-text">提高服务器性能的方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#服务器调试技术"><span class="toc-number">8.</span> <span class="toc-text">服务器调试技术</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#调整系统参数的介绍"><span class="toc-number">8.1.</span> <span class="toc-text">调整系统参数的介绍</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#GDB调试器的介绍"><span class="toc-number">8.2.</span> <span class="toc-text">GDB调试器的介绍</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#系统检测工具介绍"><span class="toc-number">8.3.</span> <span class="toc-text">系统检测工具介绍</span></a></li></ol></li></ol>
   </div>
 
 <div id="asidepart">
-<div class="closeaside"><a class="closebutton" href="#" title="隱藏側邊欄"></a></div>
+<div class="closeaside"><a class="closebutton" href="#" title="Hide Sidebar"></a></div>
 <aside class="clearfix">
 
   
@@ -200,7 +204,7 @@
   
 
   <div class="rsspart">
-	<a href="null" target="_blank" title="rss">RSS 訂閱</a>
+	<a href="null" target="_blank" title="rss">RSS</a>
 </div>
 
 </aside>

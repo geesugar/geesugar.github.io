@@ -1,0 +1,299 @@
+
+ <!DOCTYPE HTML>
+<html >
+<head>
+  <meta charset="UTF-8">
+  
+    <title>MQ | Geesugar</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=3, minimum-scale=1">
+    
+    <meta name="author" content="Jack Long">
+    
+    <meta name="description" content="ACID CAP BASE理论 两次提交CAP，一致性，可用性，分区容错性。 对分布式系统分区容错性是最基本需求，所以必然放弃一致性。NoSQL支持AP，传统数据库支持CABASE： basically available（基本可用），soft-state（软状态/柔性事物），Eventual Co">
+    
+    
+    
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/geesugar_114.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/geesugar_114.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      <div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.svg" alt="Geesugar" title="Geesugar"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="Geesugar">Geesugar</a></h1>
+				<h2 class="blog-motto">Jack&#39;s Blog</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="Menu">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/tags">Tags</a></li>
+					
+						<li><a href="/categories">Categories</a></li>
+					
+					<li>
+					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="text" id="search" name="q" autocomplete="off" maxlength="20" placeholder="Search" />
+						<input type="hidden" name="q" value="site:geesugar.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/07/05/MQ/" title="MQ" itemprop="url">MQ</a>
+  </h1>
+  <p class="article-author">By
+    
+      <a href="http://geesugar.github.io" title="Jack Long">Jack Long</a>
+    </p>
+  <p class="article-time">
+    <time datetime="2016-07-05T03:46:20.000Z" itemprop="datePublished">2016-07-05</time>
+    Updated:<time datetime="2016-07-07T00:56:09.000Z" itemprop="dateModified">2016-07-07</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">Contents</strong>
+		<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#ACID-CAP-BASE理论-两次提交"><span class="toc-number">1.</span> <span class="toc-text">ACID CAP BASE理论 两次提交</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#分布式事物"><span class="toc-number">2.</span> <span class="toc-text">分布式事物</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#两次提交"><span class="toc-number">2.1.</span> <span class="toc-text">两次提交</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#三次提交"><span class="toc-number">2.2.</span> <span class="toc-text">三次提交</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#简单脚本"><span class="toc-number">3.</span> <span class="toc-text">简单脚本</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#生产者"><span class="toc-number">3.1.</span> <span class="toc-text">生产者</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#消费者"><span class="toc-number">3.2.</span> <span class="toc-text">消费者</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#持久化脚本"><span class="toc-number">4.</span> <span class="toc-text">持久化脚本</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#生产者-1"><span class="toc-number">4.1.</span> <span class="toc-text">生产者</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#消费者-1"><span class="toc-number">4.2.</span> <span class="toc-text">消费者</span></a></li></ol></li></ol>
+		</div>
+		
+		<h2 id="ACID-CAP-BASE理论-两次提交"><a href="#ACID-CAP-BASE理论-两次提交" class="headerlink" title="ACID CAP BASE理论 两次提交"></a>ACID CAP BASE理论 两次提交</h2><p>CAP，一致性，可用性，分区容错性。 对分布式系统分区容错性是最基本需求，所以必然放弃一致性。<br>NoSQL支持AP，传统数据库支持CA<br>BASE： basically available（基本可用），soft-state（软状态/柔性事物），Eventual Consistency（最终一致）<br>BASE模型是传统ACID的反面，BASE强调牺牲高一致性，从而获得可用性，数据允许一段时间内的不一致，只保证最终一致。</p>
+<h2 id="分布式事物"><a href="#分布式事物" class="headerlink" title="分布式事物"></a>分布式事物</h2><h3 id="两次提交"><a href="#两次提交" class="headerlink" title="两次提交"></a>两次提交</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">案例： 老师短信小明，小强爬山。 如果小明、小强回到都没问题，大家如约而至。如果小明回答明天没空，老师会立即通知小明小强爬上取消。</span><br><span class="line">存在问题：如果小强没看手机，老师会一直等待回复，小明也一直在家等老师消息，那小明明天是否去爬山？</span><br></pre></td></tr></table></figure>
+<h3 id="三次提交"><a href="#三次提交" class="headerlink" title="三次提交"></a>三次提交</h3><p><img src="http://www.geesugar.com/BlogImg/DTP.png" alt=""><br>XA协议：是指TM（事物管理器）和RM（资源管理器）之间的接口。目前主流的关系型数据库产品都实现了XA接口。<br><img src="http://www.geesugar.com/BlogImg/DTP1.png" alt=""></p>
+<p><img src="http://www.geesugar.com/BlogImg/DTP2.png" alt=""></p>
+<p>总结： linux上的mysql是不支持分布式事物的。 这种方式实现难度不算太高，比较适合传统的单体应用，在一个方法中存在跨库操作的情况。 但是分布式事物对性能影响比较大，不适合高并发和高性能场景。</p>
+<h2 id="简单脚本"><a href="#简单脚本" class="headerlink" title="简单脚本"></a>简单脚本</h2><h3 id="生产者"><a href="#生产者" class="headerlink" title="生产者"></a>生产者</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/bin/env python  </span><br><span class="line">import pika  </span><br><span class="line">  </span><br><span class="line">connection = pika.BlockingConnection(pika.ConnectionParameters(  </span><br><span class="line">        host=&apos;localhost&apos;))  </span><br><span class="line">channel = connection.channel()  </span><br><span class="line">  </span><br><span class="line">channel.queue_declare(queue=&apos;hello&apos;)  </span><br><span class="line">  </span><br><span class="line">channel.basic_publish(exchange=&apos;&apos;,  </span><br><span class="line">                      routing_key=&apos;hello&apos;,  </span><br><span class="line">                      body=&apos;Hello World!&apos;)  </span><br><span class="line">print &quot; [x] Sent &apos;Hello World!&apos;&quot;  </span><br><span class="line">connection.close()</span><br></pre></td></tr></table></figure>
+<h3 id="消费者"><a href="#消费者" class="headerlink" title="消费者"></a>消费者</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/bin/env python  </span><br><span class="line">import pika  </span><br><span class="line">  </span><br><span class="line">connection = pika.BlockingConnection(pika.ConnectionParameters(  </span><br><span class="line">        host=&apos;localhost&apos;))  </span><br><span class="line">channel = connection.channel()  </span><br><span class="line">  </span><br><span class="line">channel.queue_declare(queue=&apos;hello&apos;)  </span><br><span class="line">  </span><br><span class="line">print &apos; [*] Waiting for messages. To exit press CTRL+C&apos;  </span><br><span class="line">  </span><br><span class="line">def callback(ch, method, properties, body):  </span><br><span class="line">    print &quot; [x] Received %r&quot; % (body,)  </span><br><span class="line">  </span><br><span class="line">channel.basic_consume(callback,  </span><br><span class="line">                      queue=&apos;hello&apos;,  </span><br><span class="line">                      no_ack=True)  </span><br><span class="line">  </span><br><span class="line">channel.start_consuming()</span><br></pre></td></tr></table></figure>
+<h2 id="持久化脚本"><a href="#持久化脚本" class="headerlink" title="持久化脚本"></a>持久化脚本</h2><h3 id="生产者-1"><a href="#生产者-1" class="headerlink" title="生产者"></a>生产者</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/bin/env python  </span><br><span class="line">import pika  </span><br><span class="line">import sys  </span><br><span class="line">  </span><br><span class="line">connection = pika.BlockingConnection(pika.ConnectionParameters(  </span><br><span class="line">        host=&apos;localhost&apos;))  </span><br><span class="line">channel = connection.channel()  </span><br><span class="line">  </span><br><span class="line">channel.queue_declare(queue=&apos;task_queue&apos;, durable=True)  </span><br><span class="line">  </span><br><span class="line">message = &apos; &apos;.join(sys.argv[1:]) or &quot;Hello World!&quot;  </span><br><span class="line">channel.basic_publish(exchange=&apos;&apos;,  </span><br><span class="line">                      routing_key=&apos;task_queue&apos;,  </span><br><span class="line">                      body=message,  </span><br><span class="line">                      properties=pika.BasicProperties(  </span><br><span class="line">                         delivery_mode = 2, # make message persistent  </span><br><span class="line">                      ))  </span><br><span class="line">print &quot; [x] Sent %r&quot; % (message,)  </span><br><span class="line">connection.close()</span><br></pre></td></tr></table></figure>
+<h3 id="消费者-1"><a href="#消费者-1" class="headerlink" title="消费者"></a>消费者</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/bin/env python  </span><br><span class="line">import pika  </span><br><span class="line">import time  </span><br><span class="line">  </span><br><span class="line">connection = pika.BlockingConnection(pika.ConnectionParameters(  </span><br><span class="line">        host=&apos;localhost&apos;))  </span><br><span class="line">channel = connection.channel()  </span><br><span class="line">  </span><br><span class="line">channel.queue_declare(queue=&apos;task_queue&apos;, durable=True)  </span><br><span class="line">print &apos; [*] Waiting for messages. To exit press CTRL+C&apos;  </span><br><span class="line">  </span><br><span class="line">def callback(ch, method, properties, body):  </span><br><span class="line">    print &quot; [x] Received %r&quot; % (body,)  </span><br><span class="line">    time.sleep( body.count(&apos;.&apos;) )  </span><br><span class="line">    print &quot; [x] Done&quot;  </span><br><span class="line">    ch.basic_ack(delivery_tag = method.delivery_tag)  </span><br><span class="line">  </span><br><span class="line">channel.basic_qos(prefetch_count=1)  </span><br><span class="line">channel.basic_consume(callback,  </span><br><span class="line">                      queue=&apos;task_queue&apos;)  </span><br><span class="line">  </span><br><span class="line">channel.start_consuming()</span><br></pre></td></tr></table></figure>
+  
+	</div>
+		<footer class="article-footer clearfix">
+
+
+
+
+<div class="article-share" id="share">
+
+  <div data-url="http://geesugar.github.io/2016/07/05/MQ/" data-title="MQ | Geesugar" data-tsina="null" class="share clearfix">
+  </div>
+
+</div>
+</footer>   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2016/07/15/zookpeer/" title="zookpeer">
+  <strong>PREVIOUS:</strong><br/>
+  <span>
+  zookpeer</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2016/06/29/boost/"  title="boost">
+ <strong>NEXT:</strong><br/> 
+ <span>boost
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="Show Sidebar"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">Contents</strong>
+  <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#ACID-CAP-BASE理论-两次提交"><span class="toc-number">1.</span> <span class="toc-text">ACID CAP BASE理论 两次提交</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#分布式事物"><span class="toc-number">2.</span> <span class="toc-text">分布式事物</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#两次提交"><span class="toc-number">2.1.</span> <span class="toc-text">两次提交</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#三次提交"><span class="toc-number">2.2.</span> <span class="toc-text">三次提交</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#简单脚本"><span class="toc-number">3.</span> <span class="toc-text">简单脚本</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#生产者"><span class="toc-number">3.1.</span> <span class="toc-text">生产者</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#消费者"><span class="toc-number">3.2.</span> <span class="toc-text">消费者</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#持久化脚本"><span class="toc-number">4.</span> <span class="toc-text">持久化脚本</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#生产者-1"><span class="toc-number">4.1.</span> <span class="toc-text">生产者</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#消费者-1"><span class="toc-number">4.2.</span> <span class="toc-text">消费者</span></a></li></ol></li></ol>
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="Hide Sidebar"></a></div>
+<aside class="clearfix">
+
+  
+
+  
+
+  <div class="rsspart">
+	<a href="null" target="_blank" title="rss">RSS</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<div class="social-font clearfix">
+		
+		
+		
+		
+		
+	</div>
+		<p class="copyright">Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/A-limon/pacman" target="_blank" title="Pacman">Pacman</a> © 2016 
+		
+		<a href="http://geesugar.github.io" target="_blank" title="Jack Long">Jack Long</a>
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.1.0.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else
+    {
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      h  = $('article h2')
+      ah = $('article h2'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  if(ah.length==0){
+    t.css('display','none');
+  }else{
+    c.click(function(){
+      ta.css('display', 'block').addClass('fadeIn');
+    });
+    o.click(function(){
+      ta.css('display', 'none');
+    });
+    $(window).scroll(function(){
+      ta.css("top",Math.max(140,320-$(this).scrollTop()));
+    });
+  };
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina');
+  var html = [
+  '<a href="#" class="overlay" id="qrcode"></a>',
+  '<div class="qrcode clearfix"><span>扫描二维码分享到微信朋友圈</span><a class="qrclose" href="#share"></a><strong>Loading...Please wait</strong><img id="qrcode-pic" data-src="http://s.jiathis.com/qrcode.php?url=' + encodedUrl + '"/></div>',
+  '<a href="#textlogo" class="article-back-to-top" title="Top"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="QRcode"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="Weibo"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+  $('.article-share-qrcode').click(function(){
+    var imgSrc = $('#qrcode-pic').attr('data-src');
+    $('#qrcode-pic').attr('src', imgSrc);
+    $('#qrcode-pic').load(function(){
+        $('.qrcode strong').text(' ');
+    });
+  });
+});     
+</script>
+
+
+
+
+
+
+  </body>
+</html>

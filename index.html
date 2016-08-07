@@ -34,7 +34,7 @@
 				<h1 class="site-name"><a href="/" title="Geesugar">Geesugar</a></h1>
 				<h2 class="blog-motto">Jack&#39;s Blog</h2>
 			</div>
-			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜單">
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="Menu">
 			</a></div>
 			<nav class="animated">
 				<ul>
@@ -51,7 +51,7 @@
 					
 					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
 						<label>Search</label>
-						<input type="text" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="text" id="search" name="q" autocomplete="off" maxlength="20" placeholder="Search" />
 						<input type="hidden" name="q" value="site:geesugar.github.io">
 					</form>
 					
@@ -66,15 +66,104 @@
 
   <section class="post" itemscope itemprop="blogPost">
   
-    <a href="/2016/06/18/hello-world/" title="Hello World" itemprop="url">
+    <a href="/2016/07/15/zookpeer/" title="zookpeer" itemprop="url">
   
-    <h1 itemprop="name">Hello World</h1>
+    <h1 itemprop="name">zookpeer</h1>
     
      
-           <p itemprop="description" >Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the </p>
+           <p itemprop="description" >高并发，海量存储集中式 –&amp;gt; 分布式
+Paxos算法三个角色
+proposer 提出提案
+acceptor 接受提案
+learner 学习被批准提案
+
+基本语义
+value(决议)只有被proposer提出后才能被批准
+在一次paxos算法中，只批准（chosen）一个va</p>
         
     
-    <time datetime="2016-06-18T14:07:35.735Z" itemprop="datePublished">2016-06-18</time>
+    <time datetime="2016-07-14T23:20:51.000Z" itemprop="datePublished">2016-07-15</time>
+  </a>
+</section>
+
+  <section class="post" itemscope itemprop="blogPost">
+  
+    <a href="/2016/07/05/MQ/" title="MQ" itemprop="url">
+  
+    <h1 itemprop="name">MQ</h1>
+    
+     
+           <p itemprop="description" >ACID CAP BASE理论 两次提交CAP，一致性，可用性，分区容错性。 对分布式系统分区容错性是最基本需求，所以必然放弃一致性。NoSQL支持AP，传统数据库支持CABASE： basically available（基本可用），soft-state（软状态/柔性事物），E</p>
+        
+    
+    <time datetime="2016-07-05T03:46:20.000Z" itemprop="datePublished">2016-07-05</time>
+  </a>
+</section>
+
+  <section class="post" itemscope itemprop="blogPost">
+  
+    <a href="/2016/06/29/boost/" title="boost" itemprop="url">
+  
+    <h1 itemprop="name">boost</h1>
+    
+     
+           <p itemprop="description" >编译g++ http_server.cpp  -levent
+muduo代码123456789101112131415161718192021222324252627#include &amp;lt;muduo/base/Logging.h&amp;gt;#include &amp;lt;muduo/n</p>
+        
+    
+    <time datetime="2016-06-29T02:14:16.000Z" itemprop="datePublished">2016-06-29</time>
+  </a>
+</section>
+
+  <section class="post" itemscope itemprop="blogPost">
+  
+    <a href="/2016/06/23/事件驱动模型/" title="事件驱动模型" itemprop="url">
+  
+    <h1 itemprop="name">事件驱动模型</h1>
+    
+     
+           <p itemprop="description" ></p>
+        
+    
+    <time datetime="2016-06-23T02:00:03.000Z" itemprop="datePublished">2016-06-23</time>
+  </a>
+</section>
+
+  <section class="post" itemscope itemprop="blogPost">
+  
+    <a href="/2016/06/21/I-O/" title="I/O" itemprop="url">
+  
+    <h1 itemprop="name">I/O</h1>
+    
+     
+           <p itemprop="description" >muduo libevent nginxselect()  poll()I/O复用场景
+客户端需要同时处理多个socket
+客户端呢需要同时处理用户输入和网络连接
+服务器需要同时处理监听socket和连接socket
+服务器需要同时处理TCP请求和UDP请求
+服务器需要同时监听多</p>
+        
+    
+    <time datetime="2016-06-21T10:24:20.000Z" itemprop="datePublished">2016-06-21</time>
+  </a>
+</section>
+
+  <section class="post" itemscope itemprop="blogPost">
+  
+    <a href="/2016/06/21/TCP-IP/" title="TCP/IP" itemprop="url">
+  
+    <h1 itemprop="name">TCP/IP</h1>
+    
+     
+           <p itemprop="description" >TCP/IP网络编程接收连接过程tcp需要处理的问题（丢包、重复、延迟）
+
+accept建立连接过程，三次握手
+
+
+内核处理流程syn和accept不是无限长度，和调用listen函数参数backlog有关，第一步、第二步不可控，第三步由应用程序控制。若syn队列满，则会直接丢弃</p>
+        
+    
+    <time datetime="2016-06-20T23:41:18.000Z" itemprop="datePublished">2016-06-21</time>
   </a>
 </section>
 
@@ -85,14 +174,8 @@
     <h1 itemprop="name">server</h1>
     
      
-           <p itemprop="description" >Reactor模型主线程只监听文件描述符事件是否发生，IO处理单元，如果有事件发生将其交给工作线程处理（逻辑单元）。
-
-主线程注册就绪事件
-主线程等待连接上的读就绪事件
-有可读事件，将其放入请求队列
-工作线程处理请求队列中的事件
-主线程等待连接可写
-可写时，主线程将可写时间放入请</p>
+           <p itemprop="description" >例子接入层，（维护长连接，业务逻辑少，初步攻防：连接频率, 过滤，压缩与解压缩，黑白名单）逻辑处理层（接口有限：登录，登出，keepalive，）存储（内存存储，数据库存储）
+拔掉网线，可能客户端和业务端都无法捕捉到epollin，epollout, epollerror事件，每</p>
         
     
     <time datetime="2016-06-18T12:39:41.000Z" itemprop="datePublished">2016-06-18</time>
@@ -171,80 +254,16 @@ sed流程与原理模式空间与缓存空间</p>
   </a>
 </section>
 
-  <section class="post" itemscope itemprop="blogPost">
-  
-    <a href="/2016/06/13/MySQL优化/" title="MySQL优化" itemprop="url">
-  
-    <h1 itemprop="name">MySQL优化</h1>
-    
-     
-           <p itemprop="description" >优化流程
-innodbInnoDB线程：4个IO线程（read buffer， write buffer， log thread， insert buffer thread），1个master线程，1个锁监控线程，1个错误监控线程
-观察周期性变化
-是否是由于缓存过期引起的周期性变</p>
-        
-    
-    <time datetime="2016-06-13T13:48:56.000Z" itemprop="datePublished">2016-06-13</time>
-  </a>
-</section>
 
-  <section class="post" itemscope itemprop="blogPost">
-  
-    <a href="/2016/06/13/Smart-Pointer/" title="Smart Pointer" itemprop="url">
-  
-    <h1 itemprop="name">Smart Pointer</h1>
-    
-     
-           <p itemprop="description" >概念
-智能指针实质是个对象，行为表现却像一个指针。
-智能指针实际上是对普通指针加了一层封装机制，这样的一层封装机制的目的是为了使智能指针可以方便的管理一个对象的生命周期。
-
-分类scope_ptrshared_ptrweak_ptr原理参考https://www.zhihu.co</p>
-        
-    
-    <time datetime="2016-06-13T12:59:35.000Z" itemprop="datePublished">2016-06-13</time>
-  </a>
-</section>
-
-  <section class="post" itemscope itemprop="blogPost">
-  
-    <a href="/2016/06/12/Multi-Thread/" title="Multi Thread" itemprop="url">
-  
-    <h1 itemprop="name">Multi Thread</h1>
-    
-     
-           <p itemprop="description" >线程安全对象周期管理多线程下对象销毁可能存在竞态
-不能由对象自身的mutex来保护
-在即将析构一个对象时，从何而知此时此刻有别的线程在正在执行对象的成员函数
-如何保证在执行成员函数期间，对象不会在另一个线程析构
-在调用某个对象的成员函数之前，如果得知这个对象是否还活着？它的析构函</p>
-        
-    
-    <time datetime="2016-06-12T06:38:01.000Z" itemprop="datePublished">2016-06-12</time>
-  </a>
-</section>
-
-  <section class="post" itemscope itemprop="blogPost">
-  
-    <a href="/2016/06/11/Language/" title="linux共享内存" itemprop="url">
-  
-    <h1 itemprop="name">linux共享内存</h1>
-    
-     
-           <p itemprop="description" >概述共享内存是可用IPC形式中最快的。使用共享内存需要掌握多个进程之间对给定内存区的同步访问。通常，信号量被用来实现对共享内存访问的同步。
-内存布局权限结构内核给每个IPC对象维护一个信息结构ipc_perm,该结构规定了权限和所有者。在sys/ipc.h中定义如下：123456</p>
-        
-    
-    <time datetime="2016-06-11T12:43:32.000Z" itemprop="datePublished">2016-06-11</time>
-  </a>
-</section>
-
+  <nav id="page-nav" class="clearfix">
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
+  </nav>
 
 </div>
-      <div class="openaside"><a class="navbutton" href="#" title="顯示側邊欄"></a></div>
+      <div class="openaside"><a class="navbutton" href="#" title="Show Sidebar"></a></div>
 
 <div id="asidepart">
-<div class="closeaside"><a class="closebutton" href="#" title="隱藏側邊欄"></a></div>
+<div class="closeaside"><a class="closebutton" href="#" title="Hide Sidebar"></a></div>
 <aside class="clearfix">
 
   
@@ -252,7 +271,7 @@ innodbInnoDB线程：4个IO线程（read buffer， write buffer， log thread，
   
 
   <div class="rsspart">
-	<a href="null" target="_blank" title="rss">RSS 訂閱</a>
+	<a href="null" target="_blank" title="rss">RSS</a>
 </div>
 
 </aside>

@@ -4,16 +4,19 @@
 <head>
   <meta charset="UTF-8">
   
-    <title>Smart Pointer | Geesugar</title>
+    <title>I/O | Geesugar</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=3, minimum-scale=1">
     
     <meta name="author" content="Jack Long">
     
-    <meta name="description" content="概念
-智能指针实质是个对象，行为表现却像一个指针。
-智能指针实际上是对普通指针加了一层封装机制，这样的一层封装机制的目的是为了使智能指针可以方便的管理一个对象的生命周期。
+    <meta name="description" content="muduo libevent nginxselect()  poll()I/O复用场景
+客户端需要同时处理多个socket
+客户端呢需要同时处理用户输入和网络连接
+服务器需要同时处理监听socket和连接socket
+服务器需要同时处理TCP请求和UDP请求
+服务器需要同时监听多个端口
 
-分类scope_ptrshared_ptrweak_ptr原理参考https://www.zhihu.com/question">
+selec">
     
     
     
@@ -73,15 +76,15 @@
 		<header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2016/06/13/Smart-Pointer/" title="Smart Pointer" itemprop="url">Smart Pointer</a>
+      <a href="/2016/06/21/I-O/" title="I/O" itemprop="url">I/O</a>
   </h1>
   <p class="article-author">By
     
       <a href="http://geesugar.github.io" title="Jack Long">Jack Long</a>
     </p>
   <p class="article-time">
-    <time datetime="2016-06-13T12:59:35.000Z" itemprop="datePublished">2016-06-13</time>
-    Updated:<time datetime="2016-06-13T13:38:18.000Z" itemprop="dateModified">2016-06-13</time>
+    <time datetime="2016-06-21T10:24:20.000Z" itemprop="datePublished">2016-06-21</time>
+    Updated:<time datetime="2016-06-21T11:23:31.000Z" itemprop="dateModified">2016-06-21</time>
     
   </p>
 </header>
@@ -90,15 +93,21 @@
 		
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">Contents</strong>
-		<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#概念"><span class="toc-number">1.</span> <span class="toc-text">概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#分类"><span class="toc-number">2.</span> <span class="toc-text">分类</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#scope-ptr"><span class="toc-number">2.1.</span> <span class="toc-text">scope_ptr</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#shared-ptr"><span class="toc-number">2.2.</span> <span class="toc-text">shared_ptr</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#weak-ptr"><span class="toc-number">2.3.</span> <span class="toc-text">weak_ptr</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#原理"><span class="toc-number">3.</span> <span class="toc-text">原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考"><span class="toc-number">4.</span> <span class="toc-text">参考</span></a></li></ol>
+		<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#muduo-libevent-nginx"><span class="toc-number">1.</span> <span class="toc-text">muduo libevent nginx</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#select-poll"><span class="toc-number">2.</span> <span class="toc-text">select()  poll()</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#I-O复用场景"><span class="toc-number">2.1.</span> <span class="toc-text">I/O复用场景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#select"><span class="toc-number">2.2.</span> <span class="toc-text">select()</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#poll"><span class="toc-number">2.3.</span> <span class="toc-text">poll()</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#epoll"><span class="toc-number">3.</span> <span class="toc-text">epoll()</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#I-O复用模型的使用"><span class="toc-number">4.</span> <span class="toc-text">I/O复用模型的使用</span></a></li></ol>
 		</div>
 		
-		<h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><ul>
-<li>智能指针实质是个对象，行为表现却像一个指针。</li>
-<li>智能指针实际上是对普通指针加了一层封装机制，这样的一层封装机制的目的是为了使智能指针可以方便的管理一个对象的生命周期。</li>
+		<h2 id="muduo-libevent-nginx"><a href="#muduo-libevent-nginx" class="headerlink" title="muduo libevent nginx"></a>muduo libevent nginx</h2><h2 id="select-poll"><a href="#select-poll" class="headerlink" title="select()  poll()"></a>select()  poll()</h2><h3 id="I-O复用场景"><a href="#I-O复用场景" class="headerlink" title="I/O复用场景"></a>I/O复用场景</h3><ul>
+<li>客户端需要同时处理多个socket</li>
+<li>客户端呢需要同时处理用户输入和网络连接</li>
+<li>服务器需要同时处理监听socket和连接socket</li>
+<li>服务器需要同时处理TCP请求和UDP请求</li>
+<li>服务器需要同时监听多个端口</li>
 </ul>
-<h2 id="分类"><a href="#分类" class="headerlink" title="分类"></a>分类</h2><h3 id="scope-ptr"><a href="#scope-ptr" class="headerlink" title="scope_ptr"></a>scope_ptr</h3><h3 id="shared-ptr"><a href="#shared-ptr" class="headerlink" title="shared_ptr"></a>shared_ptr</h3><h3 id="weak-ptr"><a href="#weak-ptr" class="headerlink" title="weak_ptr"></a>weak_ptr</h3><h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://www.zhihu.com/question/20368881" target="_blank" rel="external">https://www.zhihu.com/question/20368881</a>  《如何理解智能指针》</p>
-  
+<h3 id="select"><a href="#select" class="headerlink" title="select()"></a>select()</h3><h3 id="poll"><a href="#poll" class="headerlink" title="poll()"></a>poll()</h3><h2 id="epoll"><a href="#epoll" class="headerlink" title="epoll()"></a>epoll()</h2><p>linux特有I/O复用函数，是一组函数来实现的。内核维护事件表，因此不需要像select每次都赋值描述符，用户态到内核态的拷贝很耗时间</p>
+<p>int epoll_create(int size)  //返回描述符，size多少个事件<br>int epoll_ctl(int epfd, int op,  int fd, struct epoll_event<em> event)<br>//op操作类型三种， 注册事件，修改事件，删除事件<br>struct epoll_event{<br>    int32 events; //epoll时间表<br>    epoll_data data;<br>}<br>int  epoll_wait(int epfd, struct epoll_event</em> events, int maxevents, int timeout); //返回数目</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">int ret = poll(fd, MAX_SOCKET_NUMBERS, -1);</span><br><span class="line">for(int i=0; i&lt;MAX_SOCKET_NUMBERS; i++)&#123;</span><br><span class="line">	if(fd[i].revents | POLLIN)&#123;</span><br><span class="line">		int sockfd = fd[i].fs;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int ret = epoll_wait(epollfd, events, MAX_SOCKET_NUMBERS, -1);</span><br><span class="line">for(int i=0; i&lt;ret; i++)&#123;</span><br><span class="line">	int sockfd = events[i].data.fd;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="http://www.geesugar.com/BlogImg/epoll.png" alt=""></p>
+<h2 id="I-O复用模型的使用"><a href="#I-O复用模型的使用" class="headerlink" title="I/O复用模型的使用"></a>I/O复用模型的使用</h2>  
 	</div>
 		<footer class="article-footer clearfix">
 
@@ -107,7 +116,7 @@
 
 <div class="article-share" id="share">
 
-  <div data-url="http://geesugar.github.io/2016/06/13/Smart-Pointer/" data-title="Smart Pointer | Geesugar" data-tsina="null" class="share clearfix">
+  <div data-url="http://geesugar.github.io/2016/06/21/I-O/" data-title="I/O | Geesugar" data-tsina="null" class="share clearfix">
   </div>
 
 </div>
@@ -117,18 +126,18 @@
 <nav class="article-nav clearfix">
  
  <div class="prev" >
- <a href="/2016/06/13/MySQL优化/" title="MySQL优化">
+ <a href="/2016/06/23/事件驱动模型/" title="事件驱动模型">
   <strong>PREVIOUS:</strong><br/>
   <span>
-  MySQL优化</span>
+  事件驱动模型</span>
 </a>
 </div>
 
 
 <div class="next">
-<a href="/2016/06/12/Multi-Thread/"  title="Multi Thread">
+<a href="/2016/06/21/TCP-IP/"  title="TCP/IP">
  <strong>NEXT:</strong><br/> 
- <span>Multi Thread
+ <span>TCP/IP
 </span>
 </a>
 </div>
@@ -141,7 +150,7 @@
 
   <div id="toc" class="toc-aside">
   <strong class="toc-title">Contents</strong>
-  <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#概念"><span class="toc-number">1.</span> <span class="toc-text">概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#分类"><span class="toc-number">2.</span> <span class="toc-text">分类</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#scope-ptr"><span class="toc-number">2.1.</span> <span class="toc-text">scope_ptr</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#shared-ptr"><span class="toc-number">2.2.</span> <span class="toc-text">shared_ptr</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#weak-ptr"><span class="toc-number">2.3.</span> <span class="toc-text">weak_ptr</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#原理"><span class="toc-number">3.</span> <span class="toc-text">原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考"><span class="toc-number">4.</span> <span class="toc-text">参考</span></a></li></ol>
+  <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#muduo-libevent-nginx"><span class="toc-number">1.</span> <span class="toc-text">muduo libevent nginx</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#select-poll"><span class="toc-number">2.</span> <span class="toc-text">select()  poll()</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#I-O复用场景"><span class="toc-number">2.1.</span> <span class="toc-text">I/O复用场景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#select"><span class="toc-number">2.2.</span> <span class="toc-text">select()</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#poll"><span class="toc-number">2.3.</span> <span class="toc-text">poll()</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#epoll"><span class="toc-number">3.</span> <span class="toc-text">epoll()</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#I-O复用模型的使用"><span class="toc-number">4.</span> <span class="toc-text">I/O复用模型的使用</span></a></li></ol>
   </div>
 
 <div id="asidepart">

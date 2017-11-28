@@ -1,6 +1,6 @@
 # TCP 状态迁移图
 <p align="center">
-  <img alt="" src="http://img.blog.csdn.net/20141020191900984" width="400"/>
+  <img alt="" src="http://geesugar.github.io/doc/images/tcp_state_machine.png" width="400"/>
 </p>
 # TCP 三次握手
 <p align="center">

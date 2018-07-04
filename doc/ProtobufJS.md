@@ -2,7 +2,7 @@
 [protobuf.js](https://github.com/dcodeIO/protobuf.js)
 
 # test.proto
-```
+```js
 syntax = "proto3";
 package awesomepackage;
 
@@ -12,7 +12,7 @@ message AwesomeMessage {
 ```
 
 # html
-```
+```js
 <script src="protobuf.js/dist/protobuf.js"></script>
 
 var AwesomeMessage;
@@ -34,7 +34,7 @@ protobuf.load("test.proto", function (err, root) {
 ```
 
 # nodejs
-```
+```js
 const WebSocket = require('ws');
 var protobuf = require("protobufjs");
 

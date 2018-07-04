@@ -4,5 +4,7 @@
 
 - [ProtobufJS](https://github.com/geesugar/geesugar.github.io/tree/master/doc/ProtobufJS.md)
 
+- [Vue跨域问题](https://github.com/geesugar/geesugar.github.io/tree/master/doc/Vue_CORS.md)
+
 ## javascript优秀代码
 - [JavascriptCode](https://github.com/geesugar/geesugar.github.io/tree/master/doc/JavascriptCode.md)

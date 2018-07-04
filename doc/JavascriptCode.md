@@ -1,0 +1,1 @@
+[Emitter.js 事件注册回调](https://github.com/MetinSeylan/Vue-Socket.io/blob/master/src/Emitter.js)

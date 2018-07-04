@@ -1,7 +1,7 @@
 # Express + WebSocket
 
 ## Express服务代码
-```
+```js
 var express = require('express');
 var fs = require('fs');
 var path = require('path');
@@ -36,7 +36,7 @@ app.listen(3000, function () {
 ```
 
 ## html代码
-```
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -60,7 +60,7 @@ app.listen(3000, function () {
 ```
 
 ## WebSocket服务代码
-```
+```js
 const WebSocket = require('ws');
 
 var listen_port = 8888;
